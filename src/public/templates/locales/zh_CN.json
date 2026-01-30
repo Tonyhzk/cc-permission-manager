@@ -1,0 +1,51 @@
+{
+  "comment": "Claude Code 权限系统统一配置",
+  "description": {
+    "modes": "三种 CLI 模式的权限开关配置",
+    "categories": "命令分类定义（支持 Glob 通配符 * 和 ?）",
+    "notifications": "通知系统配置"
+  },
+  "settings": {
+    "description": {
+      "mac": "MAC/LINUX 系统",
+      "windows": "WINDOWS 系统"
+    },
+    "statusMessage": "检查权限..."
+  },
+  "notifications": {
+    "onCompletion": {
+      "title": "Claude Code",
+      "message": "任务完成，等待下一步指令"
+    },
+    "onPermissionRequest": {
+      "title": "Claude Code",
+      "message": "需要您的批准"
+    }
+  },
+  "hook": {
+    "defaultCompletionMessage": "任务完成",
+    "defaultPermissionMessage": "需要您的批准",
+    "log": {
+      "processing": "处理 {event} 事件",
+      "notificationsDisabled": "通知未启用",
+      "completionNotificationDisabled": "完成通知未启用",
+      "permissionNotificationDisabled": "权限请求通知未启用",
+      "sendingNotification": "发送通知 - 系统: {system}, 标题: {title}, 声音: {sound}",
+      "notificationFailed": "发送通知失败: {error}",
+      "checkingCommand": "检查子命令: {command}",
+      "decision": "决策: {decision}",
+      "finalDecision": "最终决策: {decision}",
+      "matchedPattern": "匹配到模式: {pattern}",
+      "extractedPaths": "提取到的路径: {paths}",
+      "checkingPath": "检查路径: {path}",
+      "workingDir": "工作目录: {dir}",
+      "configNotFound": "找不到配置文件 {path}",
+      "readConfigFailed": "读取配置文件失败: {error}",
+      "unknownEvent": "未知的事件类型: {event}",
+      "jsonParseFailed": "JSON 解析失败: {error}",
+      "readInputFailed": "读取输入失败: {error}",
+      "modeNotFound": "错误: 找不到模式 {mode}",
+      "splitCommands": "拆分为 {count} 个子命令: {commands}"
+    }
+  }
+}

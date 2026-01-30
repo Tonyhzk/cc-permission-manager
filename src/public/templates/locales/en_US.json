@@ -1,0 +1,51 @@
+{
+  "comment": "Claude Code Permission System Configuration",
+  "description": {
+    "modes": "Permission switches for three CLI modes",
+    "categories": "Command categorization (supports Glob wildcards * and ?)",
+    "notifications": "Notification system configuration"
+  },
+  "settings": {
+    "description": {
+      "mac": "MAC/LINUX System",
+      "windows": "WINDOWS System"
+    },
+    "statusMessage": "Checking permissions..."
+  },
+  "notifications": {
+    "onCompletion": {
+      "title": "Claude Code",
+      "message": "Task completed, awaiting next instruction"
+    },
+    "onPermissionRequest": {
+      "title": "Claude Code",
+      "message": "Your approval is required"
+    }
+  },
+  "hook": {
+    "defaultCompletionMessage": "Task completed",
+    "defaultPermissionMessage": "Your approval is required",
+    "log": {
+      "processing": "Processing {event} event",
+      "notificationsDisabled": "Notifications disabled",
+      "completionNotificationDisabled": "Completion notification disabled",
+      "permissionNotificationDisabled": "Permission request notification disabled",
+      "sendingNotification": "Sending notification - System: {system}, Title: {title}, Sound: {sound}",
+      "notificationFailed": "Sending notification failed: {error}",
+      "checkingCommand": "Checking sub-command: {command}",
+      "decision": "Decision: {decision}",
+      "finalDecision": "Final decision: {decision}",
+      "matchedPattern": "Matched pattern: {pattern}",
+      "extractedPaths": "Extracted paths: {paths}",
+      "checkingPath": "Checking path: {path}",
+      "workingDir": "Working directory: {dir}",
+      "configNotFound": "Config file not found {path}",
+      "readConfigFailed": "Failed to read config file: {error}",
+      "unknownEvent": "Unknown event type: {event}",
+      "jsonParseFailed": "JSON parsing failed: {error}",
+      "readInputFailed": "Failed to read input: {error}",
+      "modeNotFound": "Error: mode not found {mode}",
+      "splitCommands": "Split into {count} sub-commands: {commands}"
+    }
+  }
+}

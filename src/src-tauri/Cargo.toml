@@ -1,0 +1,25 @@
+[package]
+name = "cc-permission-manager"
+version = "0.1.0"
+description = "Claude Code Permission Manager"
+authors = [""]
+license = "MIT"
+repository = ""
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-dialog = "2"
+tauri-plugin-os = "2.0"
+tauri-plugin-shell = "2.0"
+tauri-plugin-store = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+dirs = "5"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

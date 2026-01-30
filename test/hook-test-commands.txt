@@ -1,0 +1,17 @@
+echo "test1" && echo "test2" && echo "test3"
+echo "test && inside" && pwd
+echo 'single && quote' && echo "double && quote" && pwd
+pwd && ls -la package.json && cat package.json | head -5
+cd /tmp && pwd && ls -la | head -5
+echo "test content" > /tmp/test-echo.txt && cat /tmp/test-echo.txt
+grep -A 25 "Command: cd /tmp && pwd && ls -la | head -5" /tmp/claude-hook-debug.log | head -30
+cd /Users/hzk/Documents/GitHub/Cline-Permission-System-For-Claude-Code/src/cc_permission_manager && pnpm dev
+rm -rf /Users/hzk/Documents/GitHub/Cline-Permission-System-For-Claude-Code/src/cc_permission_manager/src/components/project
+git status && git diff && git log --oneline | head -5
+cd /Users/hzk/Documents/GitHub/Cline-Permission-System-For-Claude-Code/src/cc_permission_manager/src/components && find project -type f -delete && rmdir project
+pnpm typecheck
+echo "test message" && pwd
+
+Update(~/Documents/GitHub/cc-permission/src/src/lib/global-hook-installer.ts) 
+
+Read(~/Documents/GitHub/cc-permission/src/src/stores/config-store.ts) 

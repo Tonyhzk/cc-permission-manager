@@ -1,0 +1,42 @@
+{
+  "_description": {
+    "system": "{{settings.description.windows}}"
+  },
+  "alwaysThinkingEnabled": false,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \".claude\\hooks\\unified-hook.py\"",
+            "statusMessage": "{{settings.statusMessage}}"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \".claude\\hooks\\unified-hook.py\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ],
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python \".claude\\hooks\\unified-hook.py\"",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
