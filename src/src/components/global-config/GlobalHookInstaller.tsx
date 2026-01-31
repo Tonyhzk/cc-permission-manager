@@ -18,28 +18,42 @@ import {
   installHooks,
   uninstallHooks,
   isHooksInstalled,
-  getInstalledHookLanguage,
   switchHookLanguage,
   isGlobalDir,
   type Language,
 } from '@/lib/global-hook-installer';
 import { useConfigStore, useWorkspaceStore } from '@/stores';
-import { CheckCircle2, XCircle, Download, Trash2, Loader2, Languages } from 'lucide-react';
+import { CheckCircle2, XCircle, Download, Trash2, Loader2, Languages, RotateCcw } from 'lucide-react';
 import { PythonStatusCard, type PythonStatus } from './PythonStatusCard';
 
 export function GlobalHookInstaller() {
   const { t, i18n } = useTranslation();
-  const { loadConfig } = useConfigStore();
+  const { loadConfig, resetToDefaults, saveConfig, config } = useConfigStore();
   const { workspacePath, getEffectiveClaudeDir } = useWorkspaceStore();
   const [isInstalled, setIsInstalled] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showUninstallDialog, setShowUninstallDialog] = useState(false);
-  const [installedLanguage, setInstalledLanguage] = useState<Language | null>(null);
+  const [showResetDialog, setShowResetDialog] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const [isSwitchingLanguage, setIsSwitchingLanguage] = useState(false);
   const [settingsFileName, setSettingsFileName] = useState('settings.json');
   const [pythonStatus, setPythonStatus] = useState<PythonStatus>(null);
+
+  // 从配置中获取当前语言
+  // 如果没有 language 字段，从 _comment 推断（中文注释表示中文配置）
+  const getConfigLanguage = (): Language => {
+    if (config?.language) {
+      return config.language as Language;
+    }
+    // 从 _comment 推断：如果包含中文字符，则为中文
+    if (config?._comment && /[\u4e00-\u9fa5]/.test(config._comment)) {
+      return 'zh_CN';
+    }
+    return 'en_US';
+  };
+  const installedLanguage = getConfigLanguage();
 
   // 检查安装状态
   const checkInstallStatus = async () => {
@@ -52,15 +66,6 @@ export function GlobalHookInstaller() {
       // 判断 settings 文件名
       const isGlobal = await isGlobalDir(claudeDir);
       setSettingsFileName(isGlobal ? 'settings.json' : 'settings.local.json');
-
-      // 如果已安装，获取当前语言
-      if (installed) {
-        const language = await getInstalledHookLanguage(claudeDir);
-        console.log('Installed language:', language);
-        setInstalledLanguage(language);
-      } else {
-        setInstalledLanguage(null);
-      }
     } catch (error) {
       console.error('Failed to check install status:', error);
     } finally {
@@ -97,8 +102,7 @@ export function GlobalHookInstaller() {
       if (result.success) {
         setMessage({ type: 'success', text: result.message });
         setIsInstalled(true);
-        setInstalledLanguage(language as Language);
-        // 重新加载配置
+        // 重新加载配置（会自动获取语言）
         await loadConfig();
       } else {
         setMessage({
@@ -129,7 +133,6 @@ export function GlobalHookInstaller() {
       if (result.success) {
         setMessage({ type: 'success', text: result.message });
         setIsInstalled(false);
-        setInstalledLanguage(null);
       } else {
         setMessage({
           type: 'error',
@@ -159,8 +162,7 @@ export function GlobalHookInstaller() {
 
       if (result.success) {
         setMessage({ type: 'success', text: result.message });
-        setInstalledLanguage(newLanguage);
-        // 重新加载配置以同步通知等设置
+        // 重新加载配置以同步语言和通知等设置
         await loadConfig();
       } else {
         setMessage({
@@ -175,6 +177,27 @@ export function GlobalHookInstaller() {
       });
     } finally {
       setIsSwitchingLanguage(false);
+    }
+  };
+
+  // 重置配置
+  const handleResetConfig = async () => {
+    setIsResetting(true);
+    setMessage(null);
+    setShowResetDialog(false);
+
+    try {
+      await resetToDefaults();
+      await saveConfig();
+      setMessage({ type: 'success', text: t('hooks.resetSuccess') });
+      await loadConfig();
+    } catch (error) {
+      setMessage({
+        type: 'error',
+        text: error instanceof Error ? error.message : 'Unknown error',
+      });
+    } finally {
+      setIsResetting(false);
     }
   };
 
@@ -275,14 +298,14 @@ export function GlobalHookInstaller() {
 
             {/* 当前语言 */}
             <Badge variant="outline">
-              {(installedLanguage || 'zh_CN') === 'zh_CN' ? '中文' : 'English'}
+              {installedLanguage === 'zh_CN' ? '中文' : 'English'}
             </Badge>
 
             {/* 切换语言按钮 */}
             <Button
               variant="outline"
               size="sm"
-              onClick={() => handleSwitchLanguage((installedLanguage || 'zh_CN') === 'zh_CN' ? 'en_US' : 'zh_CN')}
+              onClick={() => handleSwitchLanguage(installedLanguage === 'zh_CN' ? 'en_US' : 'zh_CN')}
               disabled={isSwitchingLanguage || isLoading}
               className="gap-2"
             >
@@ -294,7 +317,28 @@ export function GlobalHookInstaller() {
               ) : (
                 <>
                   <Languages className="w-3 h-3" />
-                  {t('hooks.switchTo')} {(installedLanguage || 'zh_CN') === 'zh_CN' ? 'English' : '中文'}
+                  {t('hooks.switchTo')} {installedLanguage === 'zh_CN' ? 'English' : '中文'}
+                </>
+              )}
+            </Button>
+
+            {/* 重置配置按钮 */}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowResetDialog(true)}
+              disabled={isResetting || isLoading}
+              className="gap-2"
+            >
+              {isResetting ? (
+                <>
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  {t('hooks.resetting')}
+                </>
+              ) : (
+                <>
+                  <RotateCcw className="w-3 h-3" />
+                  {t('hooks.resetConfig')}
                 </>
               )}
             </Button>
@@ -334,6 +378,23 @@ export function GlobalHookInstaller() {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
             <AlertDialogAction onClick={handleUninstall}>
+              {t('actions.confirm')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t('hooks.resetConfirmTitle')}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t('hooks.resetConfirmMessage')}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>{t('actions.cancel')}</AlertDialogCancel>
+            <AlertDialogAction onClick={handleResetConfig}>
               {t('actions.confirm')}
             </AlertDialogAction>
           </AlertDialogFooter>

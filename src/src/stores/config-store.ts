@@ -3,15 +3,47 @@ import { devtools } from 'zustand/middleware';
 import { invoke } from '@tauri-apps/api/core';
 import { join } from '@tauri-apps/api/path';
 import type { PermissionsConfig, CategoryName, ModeName, ModePermissions } from '@/types';
-import { DEFAULT_PERMISSIONS_CONFIG } from '@/lib/constants';
 import { useWorkspaceStore } from './workspace-store';
+import i18n from '@/locales/i18n';
+import { generatePermissionsConfig, type Language } from '@/lib/config-generator';
+
+// 缓存的默认配置
+let cachedDefaultConfig: PermissionsConfig | null = null;
+
+/**
+ * 获取当前语言对应的模板语言代码
+ */
+function getTemplateLanguage(): Language {
+  const lang = i18n.language || 'zh';
+  return lang.startsWith('zh') ? 'zh_CN' : 'en_US';
+}
+
+/**
+ * 从模板文件加载默认配置（使用 config-generator 保持一致性）
+ */
+async function loadDefaultConfig(): Promise<PermissionsConfig> {
+  try {
+    const language = getTemplateLanguage();
+    const config = await generatePermissionsConfig(language);
+    cachedDefaultConfig = config;
+    return config;
+  } catch (error) {
+    console.error('Failed to load default config from template:', error);
+  }
+
+  // 如果有缓存，返回缓存
+  if (cachedDefaultConfig) {
+    return cachedDefaultConfig;
+  }
+
+  // 最后的 fallback
+  throw new Error('Failed to load default configuration');
+}
 
 /**
  * 深度合并配置，确保所有字段都有值
  */
-function mergeWithDefaults(loaded: Partial<PermissionsConfig>): PermissionsConfig {
-  const defaults = DEFAULT_PERMISSIONS_CONFIG;
-
+function mergeWithDefaults(loaded: Partial<PermissionsConfig>, defaults: PermissionsConfig): PermissionsConfig {
   return {
     _comment: loaded._comment ?? defaults._comment,
     _description: loaded._description ?? defaults._description,
@@ -87,17 +119,17 @@ interface ConfigState {
   // 持久化
   loadConfig: () => Promise<void>;
   saveConfig: () => Promise<void>;
-  resetToDefaults: () => void;
+  resetToDefaults: () => Promise<void>;
   discardChanges: () => void;
 }
 
 export const useConfigStore = create<ConfigState>()(
   devtools(
     (set, get) => ({
-      // 初始状态
-      config: DEFAULT_PERMISSIONS_CONFIG,
+      // 初始状态 - config 为 null，loadConfig 后才有值
+      config: null as unknown as PermissionsConfig,
       originalConfig: null,
-      isLoading: false,
+      isLoading: true, // 初始为 true，表示正在加载
       isSaving: false,
       hasChanges: false,
       error: null,
@@ -217,14 +249,15 @@ export const useConfigStore = create<ConfigState>()(
             if (result.success && result.content) {
               // 解析并与默认值合并，确保所有字段都有值
               const loaded = JSON.parse(result.content);
-              config = mergeWithDefaults(loaded);
+              const defaults = await loadDefaultConfig();
+              config = mergeWithDefaults(loaded, defaults);
             } else {
               // 读取失败，使用默认配置
-              config = DEFAULT_PERMISSIONS_CONFIG;
+              config = await loadDefaultConfig();
             }
           } else {
             // 文件不存在，使用默认配置
-            config = DEFAULT_PERMISSIONS_CONFIG;
+            config = await loadDefaultConfig();
           }
 
           set({
@@ -234,11 +267,12 @@ export const useConfigStore = create<ConfigState>()(
             hasChanges: false,
           });
         } catch (error) {
+          const defaults = await loadDefaultConfig();
           set({
             error: error instanceof Error ? error.message : 'Failed to load config',
             isLoading: false,
-            config: DEFAULT_PERMISSIONS_CONFIG,
-            originalConfig: JSON.parse(JSON.stringify(DEFAULT_PERMISSIONS_CONFIG)),
+            config: defaults,
+            originalConfig: JSON.parse(JSON.stringify(defaults)),
           });
         }
       },
@@ -277,9 +311,10 @@ export const useConfigStore = create<ConfigState>()(
       },
 
       // 重置为默认值
-      resetToDefaults: () => {
+      resetToDefaults: async () => {
+        const defaults = await loadDefaultConfig();
         set({
-          config: DEFAULT_PERMISSIONS_CONFIG,
+          config: defaults,
           hasChanges: true,
         });
       },

@@ -70,6 +70,7 @@ export interface PermissionsConfig {
     categories: string;
     notifications: string;
   };
+  language?: string;
   modes: {
     plan: ModePermissions;
     default: ModePermissions;

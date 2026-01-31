@@ -49,6 +49,7 @@ FOLDERS_TO_BACKUP = [
     ".claude",
     "0_Doc",
     "2_Scripts",
+    "src",
     "test"
 ]
 
@@ -67,6 +68,7 @@ FOLDERS_TO_SKIP = [
     "src/src-tauri/target",
     "src/src-tauri/target_mac",
     "src/src-tauri/src/target",
+    "release",
     ".git"
 ]
 

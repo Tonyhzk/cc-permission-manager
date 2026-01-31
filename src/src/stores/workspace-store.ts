@@ -12,13 +12,17 @@ interface WorkspaceState {
   error: string | null;
   // 最近使用的工作目录
   recentWorkspaces: string[];
+  // hydration 状态
+  _hasHydrated: boolean;
 
   // 操作
   setWorkspace: (path: string | null) => Promise<void>;
+  setWorkspaceWithoutFileAccess: (path: string | null) => void;
   getEffectiveClaudeDir: () => Promise<string>;
   addRecentWorkspace: (path: string) => void;
   removeRecentWorkspace: (path: string) => void;
   clearRecentWorkspaces: () => void;
+  setHasHydrated: (state: boolean) => void;
 }
 
 /**
@@ -43,8 +47,13 @@ export const useWorkspaceStore = create<WorkspaceState>()(
         isLoading: false,
         error: null,
         recentWorkspaces: [],
+        _hasHydrated: false,
 
-        // 设置工作目录
+        setHasHydrated: (state: boolean) => {
+          set({ _hasHydrated: state });
+        },
+
+        // 设置工作目录（会访问文件系统确保目录存在）
         setWorkspace: async (path: string | null) => {
           set({ isLoading: true, error: null });
           try {
@@ -69,6 +78,11 @@ export const useWorkspaceStore = create<WorkspaceState>()(
             });
             throw error;
           }
+        },
+
+        // 设置工作目录（不访问文件系统，仅更新状态）
+        setWorkspaceWithoutFileAccess: (path: string | null) => {
+          set({ workspacePath: path });
         },
 
         // 获取有效的 .claude 目录路径
@@ -107,8 +121,31 @@ export const useWorkspaceStore = create<WorkspaceState>()(
           workspacePath: state.workspacePath,
           recentWorkspaces: state.recentWorkspaces,
         }),
+        onRehydrateStorage: () => (state) => {
+          state?.setHasHydrated(true);
+        },
       }
     ),
     { name: 'workspace-store' }
   )
 );
+
+/**
+ * 等待 hydration 完成的 Promise
+ */
+export const waitForHydration = (): Promise<void> => {
+  return new Promise((resolve) => {
+    const state = useWorkspaceStore.getState();
+    if (state._hasHydrated) {
+      resolve();
+      return;
+    }
+
+    const unsubscribe = useWorkspaceStore.subscribe((state) => {
+      if (state._hasHydrated) {
+        unsubscribe();
+        resolve();
+      }
+    });
+  });
+};

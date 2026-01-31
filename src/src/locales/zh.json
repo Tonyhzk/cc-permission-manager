@@ -151,7 +151,12 @@
     "confirmUninstall": "确定要卸载 hooks 吗？这将移除 settings.json 中的 hooks 配置。",
     "currentLanguage": "当前语言",
     "switchTo": "切换到",
-    "switching": "切换中..."
+    "switching": "切换中...",
+    "resetConfig": "重置配置",
+    "resetting": "重置中...",
+    "resetConfirmTitle": "确认重置",
+    "resetConfirmMessage": "此操作将把所有权限配置恢复到默认状态，您的自定义设置将丢失。确定要继续吗？",
+    "resetSuccess": "配置已重置为默认值"
   },
   "quickActions": {
     "title": "快捷操作",
@@ -194,5 +199,38 @@
     "confirmSwitchToGlobal": "确定要切换回用户目录 (~/.claude) 吗？切换后将重新加载配置。",
     "switchSuccess": "工作目录已切换",
     "switchFailed": "切换工作目录失败"
+  },
+  "update": {
+    "newVersion": "发现新版本：",
+    "clickToView": "点击查看版本详情"
+  },
+  "permission": {
+    "macOS": {
+      "title": "需要完全磁盘访问权限",
+      "description": "应用检测到您选择的工作区位于受保护的文件夹中（如文稿、桌面等）。为了避免频繁的权限弹窗，建议授予应用完全磁盘访问权限。",
+      "stepsTitle": "授权步骤：",
+      "step1": "点击下方按钮打开「系统设置」",
+      "step2": "在「隐私与安全性」中找到「完全磁盘访问权限」",
+      "step3": "点击锁图标解锁（需要输入管理员密码）",
+      "step4": "启用 cc-permission-manager 的访问权限，然后重启应用",
+      "note": "提示：如果不想授予此权限，可以切换到全局模式（~/.claude）或选择其他非受保护目录作为工作区。",
+      "openSettings": "打开系统设置",
+      "continueLater": "稍后处理",
+      "switchToGlobal": "切换到全局模式",
+      "alreadyGranted": "已授权，继续"
+    }
+  },
+  "about": {
+    "title": "关于",
+    "author": "作者",
+    "license": "许可证",
+    "repository": "仓库地址",
+    "techStack": "技术栈",
+    "thanks": "特别感谢",
+    "thanksTo": "特别感谢",
+    "specialThanks": "致敬项目",
+    "claudeCodeDesc": "Anthropic 官方 AI 编程助手",
+    "clineDesc": "自主 AI 编码代理",
+    "copyright": "© {{year}} Tonyhzk. 保留所有权利。"
   }
 }

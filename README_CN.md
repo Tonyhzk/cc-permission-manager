@@ -1,45 +1,216 @@
-# Claude Code 权限管理器
 
-[English](README.md) | [中文](README_CN.md)
+![](assets/banner.png)
 
-权限配置管理工具。
+<div align="center">
 
-**作者**: Tonyhzk
-**GitHub**: https://github.com/Tonyhzk/cc-permission-manager
+# Claude Code Permission Manager
+
+一个用于管理 Claude Code 权限配置的可视化工具
+
+[![Version](https://img.shields.io/badge/version-0.3.8-blue.svg)](https://github.com/Tonyhzk/cc-permission-manager/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey.svg)]()
+[![Tauri](https://img.shields.io/badge/Tauri-2.0-blue?logo=tauri)](https://tauri.app/)
+[![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+[English](README.md) | **中文** | [更新日志](CHANGELOG.md)
+
+</div>
+
+---
+
+## 界面预览
+
+### 主界面
+
+![](assets/zh_CN/01_main_gui.jpg)
+
+### 安装Hook
+
+![](assets/zh_CN/01_hook_install.jpg)
+
+### 权限快速开关控制
+
+![](assets/zh_CN/03_permission_control.jpg)
+
+### 指令分类设置
+
+![](assets/zh_CN/04_permission_category.jpg)
+
+### 通知设置
+
+![](assets/zh_CN/05_Note_setup.jpg)
+
+### 通知声音测试
+
+![](assets/zh_CN/06_sound_test.jpg)
+
+### 系统通知
+
+![](assets/zh_CN/07_system_note.jpg)
+
+---
 
 ## 功能特性
 
-- **全局配置**：管理不同模式下的权限（计划模式、默认模式、接受编辑模式）
-- **分类管理**：配置工具和命令分类
-- **通知设置**：自定义通知行为
-- **项目设置**：按项目配置工具权限和 MCP 服务器
-- **多语言支持**：支持英文和中文
+### 核心功能
 
-## 技术栈
+- **全局权限配置** - 管理不同模式下的权限设置
+  - 计划模式 (Plan Mode)
+  - 默认模式 (Default Mode)
+  - 接受编辑模式 (Accept Edits Mode)
+- **分类管理** - 配置工具和命令的分类权限
+- **通知设置** - 自定义通知行为和声音
+- **项目设置** - 按项目配置权限
+- **多语言支持** - 支持英文和中文界面
 
-- **前端**：React 18、TypeScript、Tailwind CSS、Radix UI
-- **状态管理**：Zustand
-- **国际化**：i18next
-- **桌面框架**：Tauri 2.0
+### 特色功能
 
-## 环境要求
+- 可视化权限编辑，告别手动修改 JSON
+- 实时预览配置变更
+- 一键安装/卸载全局 Hook
+- 支持深色/浅色主题
+- 跨平台支持 (Windows / macOS)
+
+---
+
+## 系统要求
+
+| 平台 | 最低版本 |
+|------|---------|
+| Windows | Windows 10 (1803+) |
+| macOS | macOS 10.15+ |
+
+---
+
+## 下载安装
+
+### Windows
+
+从 [Releases](https://github.com/Tonyhzk/cc-permission-manager/releases) 页面下载最新版本：
+
+- **安装版**: `CC-Permission-Manager_x.x.x_x64-setup.exe` (推荐)
+- **MSI 安装包**: `CC-Permission-Manager_x.x.x_x64_en-US.msi`
+
+### macOS
+
+从 [Releases](https://github.com/Tonyhzk/cc-permission-manager/releases) 页面下载 `.dmg` 文件。
+
+> **注意**: 首次打开时如果遇到"无法验证开发者"的提示，请执行以下命令：
+> ```bash
+> sudo xattr -rd com.apple.quarantine /Applications/CC\ Permission\ Manager.app
+> ```
+
+---
+
+## 快速开始
+
+### 1. 启动应用
+
+安装完成后启动 CC Permission Manager。
+
+### 2. 配置全局权限
+
+在「全局配置」标签页中：
+- 选择要配置的模式（计划模式/默认模式/接受编辑模式）
+- 为每个工具分类设置权限级别
+- 点击「保存」应用更改
+
+### 3. 安装全局 Hook（可选）
+
+如需使用全局 Hook 功能：
+- 点击「安装全局 Hook」按钮
+- 确认安装路径
+- Hook 将自动应用到所有 Claude Code 会话
+
+### 4. 项目级配置
+
+在「项目设置」标签页中：
+- 选择或添加项目路径
+- 配置项目特定的工具权限
+
+---
+
+## 配置文件
+
+应用程序管理以下配置文件：
+
+| 文件路径 | 说明 |
+|---------|------|
+| `~/.claude/permissions.json` | 全局权限设置 |
+| `~/.claude/settings.json` | 全局 Claude Code 设置 |
+| `<项目>/.claude/settings.json` | 项目特定设置 |
+| `<项目>/CLAUDE.md` | 项目指令文件 |
+
+### 配置文件位置
+
+- **Windows**: `C:\Users\<用户名>\.claude\`
+- **macOS**: `/Users/<用户名>/.claude/`
+
+---
+
+## 开发指南
+
+### 环境要求
 
 - Node.js 18+
 - pnpm 8+
-- Rust（用于 Tauri 开发）
+- Rust 1.70+ (用于 Tauri 开发)
 
-## 安装
+### 安装依赖
 
 ```bash
-# 安装依赖
+cd src
 pnpm install
+```
 
-# 开发模式运行
+### 开发命令
+
+```bash
+# 启动开发服务器
 pnpm dev
+
+# 类型检查
+pnpm typecheck
+
+# 代码格式化
+pnpm format
 
 # 生产构建
 pnpm build
 ```
+
+### Rust 后端开发
+
+```bash
+cd src-tauri
+
+# 代码格式化
+cargo fmt
+
+# 代码检查
+cargo clippy
+
+# 运行测试
+cargo test
+```
+
+---
+
+## 技术栈
+
+| 类别 | 技术 |
+|-----|------|
+| 前端框架 | React 18 |
+| 开发语言 | TypeScript |
+| 样式方案 | Tailwind CSS |
+| UI 组件 | Radix UI |
+| 状态管理 | Zustand |
+| 国际化 | i18next |
+| 桌面框架 | Tauri 2.0 |
+| 后端语言 | Rust |
+
+---
 
 ## 项目结构
 
@@ -58,17 +229,76 @@ src/
 
 src-tauri/
 ├── src/                 # Rust 后端代码
+│   ├── main.rs          # 应用入口
+│   └── commands.rs      # Tauri 命令
 └── tauri.conf.json      # Tauri 配置文件
 ```
 
-## 配置文件
+---
 
-应用程序管理以下配置文件：
+## 架构总览
 
-- `~/.claude/permissions.json` - 全局权限设置
-- `<项目>/.claude/settings.json` - 项目特定设置
-- `<项目>/CLAUDE.md` - 项目指令
+```
+┌─────────────────────────────────────────────────────────┐
+│                    CC Permission Manager                 │
+├─────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────┐   │
+│  │                 React Frontend                    │   │
+│  │  ┌───────────┐ ┌───────────┐ ┌───────────────┐  │   │
+│  │  │  Global   │ │  Project  │ │  Notification │  │   │
+│  │  │  Config   │ │  Settings │ │   Settings    │  │   │
+│  │  └───────────┘ └───────────┘ └───────────────┘  │   │
+│  │                      │                           │   │
+│  │              ┌───────┴───────┐                  │   │
+│  │              │ Zustand Store │                  │   │
+│  │              └───────────────┘                  │   │
+│  └─────────────────────────────────────────────────┘   │
+│                         │                               │
+│                    Tauri IPC                            │
+│                         │                               │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │                 Rust Backend                      │   │
+│  │  ┌───────────┐ ┌───────────┐ ┌───────────────┐  │   │
+│  │  │   File    │ │  Config   │ │    System     │  │   │
+│  │  │   I/O     │ │  Parser   │ │   Commands    │  │   │
+│  │  └───────────┘ └───────────┘ └───────────────┘  │   │
+│  └─────────────────────────────────────────────────┘   │
+│                         │                               │
+│              ┌──────────┴──────────┐                   │
+│              │  ~/.claude/ 配置文件  │                   │
+│              └─────────────────────┘                   │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 贡献指南
+
+欢迎提交 Pull Request！在提交之前，请确保：
+
+1. 代码通过类型检查 (`pnpm typecheck`)
+2. 代码已格式化 (`pnpm format`)
+3. 提交信息清晰明了
+
+---
 
 ## 许可证
 
-MIT
+[MIT License](LICENSE)
+
+---
+
+## 作者
+
+**Tonyhzk**
+
+- GitHub: [@Tonyhzk](https://github.com/Tonyhzk)
+- 项目地址: [cc-permission-manager](https://github.com/Tonyhzk/cc-permission-manager)
+
+---
+
+<div align="center">
+
+如果这个项目对你有帮助，欢迎给个 ⭐ Star！
+
+</div>

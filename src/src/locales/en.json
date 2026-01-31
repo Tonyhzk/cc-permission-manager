@@ -151,7 +151,12 @@
     "confirmUninstall": "Are you sure you want to uninstall hooks? This will remove the hooks configuration from settings.json.",
     "currentLanguage": "Current Language",
     "switchTo": "Switch to",
-    "switching": "Switching..."
+    "switching": "Switching...",
+    "resetConfig": "Reset Config",
+    "resetting": "Resetting...",
+    "resetConfirmTitle": "Confirm Reset",
+    "resetConfirmMessage": "This will restore all permission settings to their default values. Your custom settings will be lost. Are you sure you want to continue?",
+    "resetSuccess": "Configuration has been reset to defaults"
   },
   "quickActions": {
     "title": "Quick Actions",
@@ -194,5 +199,38 @@
     "confirmSwitchToGlobal": "Are you sure you want to switch back to home directory (~/.claude)? Configuration will be reloaded.",
     "switchSuccess": "Workspace switched successfully",
     "switchFailed": "Failed to switch workspace"
+  },
+  "update": {
+    "newVersion": "New version available:",
+    "clickToView": "Click to view release"
+  },
+  "permission": {
+    "macOS": {
+      "title": "Full Disk Access Required",
+      "description": "The app detected that your selected workspace is in a protected folder (such as Documents, Desktop, etc.). To avoid frequent permission prompts, it's recommended to grant the app Full Disk Access.",
+      "stepsTitle": "Steps to grant access:",
+      "step1": "Click the button below to open System Settings",
+      "step2": "Find \"Full Disk Access\" under \"Privacy & Security\"",
+      "step3": "Click the lock icon to unlock (admin password required)",
+      "step4": "Enable access for cc-permission-manager, then restart the app",
+      "note": "Note: If you don't want to grant this permission, you can switch to global mode (~/.claude) or select a non-protected directory as your workspace.",
+      "openSettings": "Open System Settings",
+      "continueLater": "Continue Later",
+      "switchToGlobal": "Switch to Global Mode",
+      "alreadyGranted": "Already Granted, Continue"
+    }
+  },
+  "about": {
+    "title": "About",
+    "author": "Author",
+    "license": "License",
+    "repository": "Repository",
+    "techStack": "Tech Stack",
+    "thanks": "Special Thanks",
+    "thanksTo": "Special thanks to",
+    "specialThanks": "Inspired By",
+    "claudeCodeDesc": "Official AI coding assistant by Anthropic",
+    "clineDesc": "Autonomous AI coding agent",
+    "copyright": "© {{year}} Tonyhzk. All rights reserved."
   }
 }

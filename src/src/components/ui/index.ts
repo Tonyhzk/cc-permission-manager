@@ -17,3 +17,15 @@ export {
 export { Badge, badgeVariants } from './badge';
 export { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from './accordion';
 export { Alert, AlertTitle, AlertDescription } from './alert';
+export {
+  Dialog,
+  DialogPortal,
+  DialogOverlay,
+  DialogClose,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from './dialog';

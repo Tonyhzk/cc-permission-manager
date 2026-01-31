@@ -317,10 +317,9 @@ pub fn open_directory(path: String) -> Result<(), String> {
 /// Play a system sound by name
 #[tauri::command]
 pub fn play_sound(sound_name: String) -> Result<(), String> {
-    use std::process::Command;
-
     #[cfg(target_os = "macos")]
     {
+        use std::process::Command;
         let sound_path = format!("/System/Library/Sounds/{}.aiff", sound_name);
         Command::new("afplay")
             .arg(&sound_path)
@@ -330,18 +329,63 @@ pub fn play_sound(sound_name: String) -> Result<(), String> {
 
     #[cfg(target_os = "windows")]
     {
-        // Windows system sounds are in C:\Windows\Media
+        use rodio::{Decoder, OutputStream, Sink};
+        use std::fs::File;
+        use std::io::BufReader;
+
         let sound_path = format!("C:\\Windows\\Media\\{}.wav", sound_name);
 
-        // Use PowerShell to play the sound
-        Command::new("powershell")
-            .args(["-Command", &format!("(New-Object Media.SoundPlayer '{}').PlaySync()", sound_path)])
-            .spawn()
-            .map_err(|e| format!("Failed to play sound: {}", e))?;
+        // Check if the sound file exists
+        if !std::path::Path::new(&sound_path).exists() {
+            return Err(format!("Sound file not found: {}", sound_path));
+        }
+
+        // Spawn a thread to play the sound asynchronously
+        std::thread::spawn(move || {
+            // Get an output stream handle
+            let (_stream, stream_handle) = match OutputStream::try_default() {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("Failed to get audio output stream: {}", e);
+                    return;
+                }
+            };
+
+            // Create a sink to play the sound
+            let sink = match Sink::try_new(&stream_handle) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("Failed to create audio sink: {}", e);
+                    return;
+                }
+            };
+
+            // Load the sound file
+            let file = match File::open(&sound_path) {
+                Ok(f) => f,
+                Err(e) => {
+                    eprintln!("Failed to open sound file: {}", e);
+                    return;
+                }
+            };
+
+            let source = match Decoder::new(BufReader::new(file)) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("Failed to decode sound file: {}", e);
+                    return;
+                }
+            };
+
+            // Play the sound
+            sink.append(source);
+            sink.sleep_until_end();
+        });
     }
 
     #[cfg(target_os = "linux")]
     {
+        use std::process::Command;
         // Try paplay (PulseAudio) or aplay (ALSA)
         let result = Command::new("paplay")
             .arg(format!("/usr/share/sounds/freedesktop/stereo/complete.oga"))
@@ -582,6 +626,56 @@ pub fn open_environment_variables() -> Result<(), String> {
     }
 }
 
+/// Open macOS System Preferences for Full Disk Access
+#[tauri::command]
+pub fn open_macos_full_disk_access() -> Result<(), String> {
+    #[cfg(target_os = "macos")]
+    {
+        use std::process::Command;
+
+        // Open System Settings > Privacy & Security > Full Disk Access
+        Command::new("open")
+            .arg("x-apple.systempreferences:com.apple.preference.security?Privacy_AllFiles")
+            .spawn()
+            .map_err(|e| format!("Failed to open system preferences: {}", e))?;
+
+        Ok(())
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        Err("This function is only available on macOS".to_string())
+    }
+}
+
+/// Check if the app has full disk access on macOS
+/// Returns true if access is granted or not applicable (non-macOS)
+#[tauri::command]
+pub fn check_macos_file_access(test_path: Option<String>) -> bool {
+    #[cfg(target_os = "macos")]
+    {
+        // Try to access a protected directory to test permissions
+        let path = test_path.unwrap_or_else(|| {
+            // Test with user's Documents folder
+            dirs::home_dir()
+                .map(|home| home.join("Documents").to_string_lossy().to_string())
+                .unwrap_or_else(|| "/Users".to_string())
+        });
+
+        // Try to read the directory
+        match fs::read_dir(&path) {
+            Ok(_) => true,
+            Err(_) => false,
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    {
+        let _ = test_path; // Suppress unused warning
+        true // Non-macOS systems don't need this check
+    }
+}
+
 /// Get the resource directory path for templates
 #[tauri::command]
 pub fn get_resource_path(app: AppHandle, relative_path: String) -> Result<String, String> {
@@ -612,10 +706,37 @@ pub fn get_resource_path(app: AppHandle, relative_path: String) -> Result<String
     }
 
     // In production, use the resource directory
-    let resource_path = app.path()
+    let resource_dir = app.path()
         .resource_dir()
-        .map_err(|e| e.to_string())?
-        .join(&relative_path);
+        .map_err(|e| e.to_string())?;
 
-    Ok(resource_path.to_string_lossy().to_string())
+    // Try multiple possible locations
+    let possible_paths = vec![
+        resource_dir.join("public").join(&relative_path),           // Standard location
+        resource_dir.join("_up_").join("public").join(&relative_path), // NSIS location
+        resource_dir.join(&relative_path),                          // Direct location
+    ];
+
+    // Debug logging
+    eprintln!("[DEBUG] Resource dir: {:?}", resource_dir);
+    eprintln!("[DEBUG] Relative path: {}", relative_path);
+
+    for path in &possible_paths {
+        eprintln!("[DEBUG] Trying path: {:?}", path);
+        if path.exists() {
+            eprintln!("[DEBUG] Found at: {:?}", path);
+            return Ok(path.to_string_lossy().to_string());
+        }
+    }
+
+    // If not found, return error with all tried paths
+    let tried_paths: Vec<String> = possible_paths
+        .iter()
+        .map(|p| format!("{:?}", p))
+        .collect();
+
+    Err(format!(
+        "Resource not found. Tried paths:\n{}",
+        tried_paths.join("\n")
+    ))
 }

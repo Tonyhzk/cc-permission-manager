@@ -1,45 +1,216 @@
+
+![](assets/banner.png)
+
+<div align="center">
+
 # Claude Code Permission Manager
 
-[English](README.md) | [中文](README_CN.md)
+A visual tool for managing Claude Code permission configurations
 
-A tool for managing Claude Code permission configurations.
+[![Version](https://img.shields.io/badge/version-0.3.8-blue.svg)](https://github.com/Tonyhzk/cc-permission-manager/releases)
+[![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey.svg)]()
+[![Tauri](https://img.shields.io/badge/Tauri-2.0-blue?logo=tauri)](https://tauri.app/)
+[![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**Author**: Tonyhzk
-**GitHub**: https://github.com/Tonyhzk/cc-permission-manager
+**English** | [中文](README_CN.md) | [Changelog](CHANGELOG.md)
+
+</div>
+
+---
+
+## Screenshots
+
+### Main Interface
+
+![](assets/en_US/01_main_gui.jpg)
+
+### Install Hook
+
+![](assets/en_US/01_hook_install.jpg)
+
+### Permission Quick Toggle Control
+
+![](assets/en_US/03_permission_control.jpg)
+
+### Command Category Settings
+
+![](assets/en_US/04_permission_category.jpg)
+
+### Notification Settings
+
+![](assets/en_US/05_Note_setup.jpg)
+
+### Notification Sound Test
+
+![](assets/en_US/06_sound_test.jpg)
+
+### System Notification
+
+![](assets/en_US/07_system_note.jpg)
+
+---
 
 ## Features
 
-- **Global Configuration**: Manage permissions for different modes (Plan, Default, Accept Edits)
-- **Category Management**: Configure tool and command categories
-- **Notification Settings**: Customize notification behavior
-- **Project Settings**: Per-project tool permissions and MCP server configuration
-- **Multi-language Support**: English and Chinese
+### Core Features
 
-## Tech Stack
+- **Global Permission Configuration** - Manage permissions for different modes
+  - Plan Mode
+  - Default Mode
+  - Accept Edits Mode
+- **Category Management** - Configure tool and command category permissions
+- **Notification Settings** - Customize notification behavior and sounds
+- **Project Settings** - Per-project tool permissions control
+- **Multi-language Support** - English and Chinese interface
 
-- **Frontend**: React 18, TypeScript, Tailwind CSS, Radix UI
-- **State Management**: Zustand
-- **Internationalization**: i18next
-- **Desktop Framework**: Tauri 2.0
+### Highlights
 
-## Prerequisites
+- Visual permission editing, no more manual JSON modifications
+- Real-time configuration preview
+- One-click global Hook install/uninstall
+- Dark/Light theme support
+- Cross-platform support (Windows / macOS)
+
+---
+
+## System Requirements
+
+| Platform | Minimum Version |
+|----------|-----------------|
+| Windows | Windows 10 (1803+) |
+| macOS | macOS 10.15+ |
+
+---
+
+## Download & Installation
+
+### Windows
+
+Download the latest version from [Releases](https://github.com/Tonyhzk/cc-permission-manager/releases):
+
+- **Installer**: `CC-Permission-Manager_x.x.x_x64-setup.exe` (Recommended)
+- **MSI Package**: `CC-Permission-Manager_x.x.x_x64_en-US.msi`
+
+### macOS
+
+Download the `.dmg` file from [Releases](https://github.com/Tonyhzk/cc-permission-manager/releases).
+
+> **Note**: If you encounter "unverified developer" warning on first launch, run:
+> ```bash
+> sudo xattr -rd com.apple.quarantine /Applications/CC\ Permission\ Manager.app
+> ```
+
+---
+
+## Quick Start
+
+### 1. Launch the App
+
+Start CC Permission Manager after installation.
+
+### 2. Configure Global Permissions
+
+In the "Global Config" tab:
+- Select the mode to configure (Plan Mode / Default Mode / Accept Edits Mode)
+- Set permission levels for each tool category
+- Click "Save" to apply changes
+
+### 3. Install Global Hook (Optional)
+
+To use the global Hook feature:
+- Click "Install Global Hook" button
+- Confirm the installation path
+- The Hook will automatically apply to all Claude Code sessions
+
+### 4. Project-level Configuration
+
+In the "Project Settings" tab:
+- Select or add a project path
+- Configure project-specific tool permissions
+
+---
+
+## Configuration Files
+
+The application manages the following configuration files:
+
+| File Path | Description |
+|-----------|-------------|
+| `~/.claude/permissions.json` | Global permission settings |
+| `~/.claude/settings.json` | Global Claude Code settings |
+| `<project>/.claude/settings.json` | Project-specific settings |
+| `<project>/CLAUDE.md` | Project instructions file |
+
+### Configuration File Locations
+
+- **Windows**: `C:\Users\<username>\.claude\`
+- **macOS**: `/Users/<username>/.claude/`
+
+---
+
+## Development Guide
+
+### Prerequisites
 
 - Node.js 18+
 - pnpm 8+
-- Rust (for Tauri development)
+- Rust 1.70+ (for Tauri development)
 
-## Installation
+### Install Dependencies
 
 ```bash
-# Install dependencies
+cd src
 pnpm install
+```
 
-# Run in development mode
+### Development Commands
+
+```bash
+# Start development server
 pnpm dev
 
-# Build for production
+# Type checking
+pnpm typecheck
+
+# Code formatting
+pnpm format
+
+# Production build
 pnpm build
 ```
+
+### Rust Backend Development
+
+```bash
+cd src-tauri
+
+# Code formatting
+cargo fmt
+
+# Linting
+cargo clippy
+
+# Run tests
+cargo test
+```
+
+---
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| Frontend Framework | React 18 |
+| Language | TypeScript |
+| Styling | Tailwind CSS |
+| UI Components | Radix UI |
+| State Management | Zustand |
+| Internationalization | i18next |
+| Desktop Framework | Tauri 2.0 |
+| Backend Language | Rust |
+
+---
 
 ## Project Structure
 
@@ -50,7 +221,7 @@ src/
 │   ├── global-config/   # Global configuration components
 │   ├── project/         # Project settings components
 │   └── layout/          # Layout components
-├── stores/              # Zustand stores
+├── stores/              # Zustand state management
 ├── types/               # TypeScript type definitions
 ├── lib/                 # Utility functions and constants
 ├── locales/             # i18n translation files
@@ -58,17 +229,76 @@ src/
 
 src-tauri/
 ├── src/                 # Rust backend code
+│   ├── main.rs          # Application entry
+│   └── commands.rs      # Tauri commands
 └── tauri.conf.json      # Tauri configuration
 ```
 
-## Configuration Files
+---
 
-The app manages:
+## Architecture Overview
 
-- `~/.claude/permissions.json` - Global permission settings
-- `<project>/.claude/settings.json` - Project-specific settings
-- `<project>/CLAUDE.md` - Project instructions
+```
+┌─────────────────────────────────────────────────────────┐
+│                    CC Permission Manager                 │
+├─────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────┐   │
+│  │                 React Frontend                    │   │
+│  │  ┌───────────┐ ┌───────────┐ ┌───────────────┐  │   │
+│  │  │  Global   │ │  Project  │ │  Notification │  │   │
+│  │  │  Config   │ │  Settings │ │   Settings    │  │   │
+│  │  └───────────┘ └───────────┘ └───────────────┘  │   │
+│  │                      │                           │   │
+│  │              ┌───────┴───────┐                  │   │
+│  │              │ Zustand Store │                  │   │
+│  │              └───────────────┘                  │   │
+│  └─────────────────────────────────────────────────┘   │
+│                         │                               │
+│                    Tauri IPC                            │
+│                         │                               │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │                 Rust Backend                      │   │
+│  │  ┌───────────┐ ┌───────────┐ ┌───────────────┐  │   │
+│  │  │   File    │ │  Config   │ │    System     │  │   │
+│  │  │   I/O     │ │  Parser   │ │   Commands    │  │   │
+│  │  └───────────┘ └───────────┘ └───────────────┘  │   │
+│  └─────────────────────────────────────────────────┘   │
+│                         │                               │
+│              ┌──────────┴──────────┐                   │
+│              │  ~/.claude/ configs  │                   │
+│              └─────────────────────┘                   │
+└─────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Contributing
+
+Pull requests are welcome! Before submitting, please ensure:
+
+1. Code passes type checking (`pnpm typecheck`)
+2. Code is formatted (`pnpm format`)
+3. Commit messages are clear and descriptive
+
+---
 
 ## License
 
-MIT
+[MIT License](LICENSE)
+
+---
+
+## Author
+
+**Tonyhzk**
+
+- GitHub: [@Tonyhzk](https://github.com/Tonyhzk)
+- Project: [cc-permission-manager](https://github.com/Tonyhzk/cc-permission-manager)
+
+---
+
+<div align="center">
+
+If this project helps you, please give it a ⭐ Star!
+
+</div>

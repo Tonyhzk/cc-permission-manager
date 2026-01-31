@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Card,
@@ -23,19 +24,30 @@ export function CategoryCard({
 }: CategoryCardProps) {
   const { t } = useTranslation();
 
-  const handleToolsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const tools = e.target.value
+  // Store raw text values for editing
+  const [toolsText, setToolsText] = useState(config.tools.join('\n'));
+  const [commandsText, setCommandsText] = useState(config.commands.join('\n'));
+
+  // Update local state when config changes (e.g., switching categories)
+  useEffect(() => {
+    setToolsText(config.tools.join('\n'));
+    setCommandsText(config.commands.join('\n'));
+  }, [name]); // Only update when category changes
+
+  const processLines = (text: string): string[] => {
+    return text
       .split('\n')
       .map(line => line.trim())
       .filter(line => line.length > 0);
+  };
+
+  const handleToolsBlur = () => {
+    const tools = processLines(toolsText);
     onUpdateTools(tools);
   };
 
-  const handleCommandsChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const commands = e.target.value
-      .split('\n')
-      .map(line => line.trim())
-      .filter(line => line.length > 0);
+  const handleCommandsBlur = () => {
+    const commands = processLines(commandsText);
     onUpdateCommands(commands);
   };
 
@@ -49,8 +61,9 @@ export function CategoryCard({
         <div className="space-y-2">
           <Label className="text-sm font-medium">{t('categories.tools')}</Label>
           <textarea
-            value={config.tools.join('\n')}
-            onChange={handleToolsChange}
+            value={toolsText}
+            onChange={(e) => setToolsText(e.target.value)}
+            onBlur={handleToolsBlur}
             placeholder={t('categories.enterToolsPlaceholder')}
             className="w-full min-h-[120px] px-3 py-2 text-sm rounded-md border border-input bg-background resize-y font-mono"
             spellCheck={false}
@@ -64,8 +77,9 @@ export function CategoryCard({
         <div className="space-y-2">
           <Label className="text-sm font-medium">{t('categories.commands')}</Label>
           <textarea
-            value={config.commands.join('\n')}
-            onChange={handleCommandsChange}
+            value={commandsText}
+            onChange={(e) => setCommandsText(e.target.value)}
+            onBlur={handleCommandsBlur}
             placeholder={t('categories.enterCommandsPlaceholder')}
             className="w-full min-h-[120px] px-3 py-2 text-sm rounded-md border border-input bg-background resize-y font-mono"
             spellCheck={false}
