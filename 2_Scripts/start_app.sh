@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# CC 权限管理器启动脚本
+# Claude Code 权限管理器启动脚本
 # 此脚本用于启动 Claude Code 权限管理器应用程序
 
 # 输出颜色代码
@@ -9,7 +9,7 @@ RED='\033[0;31m'
 YELLOW='\033[1;33m'
 NC='\033[0m' # 无颜色
 
-echo -e "${GREEN}=== CC 权限管理器启动 ===${NC}"
+echo -e "${GREEN}=== Claude Code 权限管理器启动 ===${NC}"
 
 # 获取脚本目录和项目根目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -44,7 +44,7 @@ if [ ! -d "node_modules" ]; then
 fi
 
 # 启动应用程序
-echo -e "${GREEN}正在启动 CC 权限管理器...${NC}"
+echo -e "${GREEN}正在启动 Claude Code 权限管理器...${NC}"
 echo -e "${YELLOW}按 Ctrl+C 停止应用程序${NC}"
 echo ""
 

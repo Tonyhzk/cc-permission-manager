@@ -1,14 +1,14 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: CC Permission Manager Startup Script
+:: Claude Code Permission Manager Startup Script
 :: Refresh PATH to include newly installed tools
 for /f "tokens=2*" %%a in ('reg query "HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\Environment" /v Path 2^>nul') do set "SYS_PATH=%%b"
 for /f "tokens=2*" %%a in ('reg query "HKCU\Environment" /v Path 2^>nul') do set "USER_PATH=%%b"
 set "PATH=%SYS_PATH%;%USER_PATH%"
 
 echo.
-echo === CC Permission Manager ===
+echo === Claude Code Permission Manager ===
 echo.
 
 :: Get script directory and resolve project paths
@@ -63,7 +63,7 @@ if not exist "node_modules" (
 )
 
 :: Start application
-echo [START] Starting CC Permission Manager...
+echo [START] Starting Claude Code Permission Manager...
 echo [TIP] Press Ctrl+C to stop
 echo.
 

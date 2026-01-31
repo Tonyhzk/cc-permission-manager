@@ -11,6 +11,7 @@ dist/
 src/src-tauri/target/
 src/src-tauri/target_mac/
 src/src-tauri/target_win/
+src/src-tauri/src/target/
 
 # IDE
 .vscode/

@@ -3,7 +3,7 @@ chcp 65001 >nul
 
 echo.
 echo ================================================================
-echo     CC Permission Manager - Build ARM64 Release
+echo     Claude Code Permission Manager - Build ARM64 Release
 echo ================================================================
 echo.
 

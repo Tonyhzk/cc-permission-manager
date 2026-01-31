@@ -3,7 +3,7 @@ chcp 65001 >nul
 
 echo.
 echo ================================================================
-echo     CC Permission Manager - Windows x64 Dev Launcher
+echo     Claude Code Permission Manager - Windows x64 Dev Launcher
 echo     (Cross-compile from ARM64 to x64)
 echo ================================================================
 echo.
