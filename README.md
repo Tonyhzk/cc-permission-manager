@@ -40,15 +40,15 @@ A visual tool for managing Claude Code permission configurations
 
 ![](assets/en_US/04_permission_category.jpg)
 
-### Notification Settings
+### Alert Settings
 
 ![](assets/en_US/05_Note_setup.jpg)
 
-### Notification Sound Test
+### Alert Sound Test
 
 ![](assets/en_US/06_sound_test.jpg)
 
-### System Notification
+### System Alert
 
 ![](assets/en_US/07_system_note.jpg)
 
@@ -63,7 +63,7 @@ A visual tool for managing Claude Code permission configurations
   - Default Mode
   - Accept Edits Mode
 - **Category Management** - Configure tool and command category permissions
-- **Notification Settings** - Customize notification behavior and sounds
+- **Alert Settings** - Customize alert behavior and sounds
 - **Project Settings** - Per-project tool permissions control
 - **Multi-language Support** - English and Chinese interface
 
