@@ -7,10 +7,13 @@
 
 A visual tool for managing Claude Code permission configurations
 
-[![Version](https://img.shields.io/badge/version-0.3.8-blue.svg)](https://github.com/Tonyhzk/cc-permission-manager/releases)
+[![Version](https://img.shields.io/badge/version-0.3.9-blue.svg)](https://github.com/Tonyhzk/cc-permission-manager/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey.svg)]()
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-blue?logo=tauri)](https://tauri.app/)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178c6?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5-646cff?logo=vite)](https://vitejs.dev/)
+[![Rust](https://img.shields.io/badge/Rust-1.70+-dea584?logo=rust)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 **English** | [中文](README_CN.md) | [Changelog](CHANGELOG.md)
@@ -27,7 +30,7 @@ A visual tool for managing Claude Code permission configurations
 
 ### Install Hook
 
-![](assets/en_US/01_hook_install.jpg)
+![](assets/en_US/02_hook_install.jpg)
 
 ### Permission Quick Toggle Control
 
@@ -207,6 +210,11 @@ cargo test
 | UI Components | Radix UI |
 | State Management | Zustand |
 | Internationalization | i18next |
+| Build Tool | Vite |
+| Animation | Framer Motion |
+| Form Validation | React Hook Form + Zod |
+| Icons | Lucide React |
+| Toast Notifications | Sonner |
 | Desktop Framework | Tauri 2.0 |
 | Backend Language | Rust |
 
@@ -279,6 +287,17 @@ Pull requests are welcome! Before submitting, please ensure:
 1. Code passes type checking (`pnpm typecheck`)
 2. Code is formatted (`pnpm format`)
 3. Commit messages are clear and descriptive
+
+---
+
+## Acknowledgements
+
+This project was inspired by the following excellent projects:
+
+- [CC Switch](https://github.com/farion1231/cc-switch) - Claude Code permission switch tool
+- [Cline](https://github.com/cline/cline) - An excellent AI coding assistant
+
+Thanks to the authors of these projects!
 
 ---
 

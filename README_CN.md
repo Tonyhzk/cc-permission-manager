@@ -7,10 +7,13 @@
 
 一个用于管理 Claude Code 权限配置的可视化工具
 
-[![Version](https://img.shields.io/badge/version-0.3.8-blue.svg)](https://github.com/Tonyhzk/cc-permission-manager/releases)
+[![Version](https://img.shields.io/badge/version-0.3.9-blue.svg)](https://github.com/Tonyhzk/cc-permission-manager/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey.svg)]()
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-blue?logo=tauri)](https://tauri.app/)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178c6?logo=typescript)](https://www.typescriptlang.org/)
+[![Vite](https://img.shields.io/badge/Vite-5-646cff?logo=vite)](https://vitejs.dev/)
+[![Rust](https://img.shields.io/badge/Rust-1.70+-dea584?logo=rust)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
 [English](README.md) | **中文** | [更新日志](CHANGELOG.md)
@@ -27,7 +30,7 @@
 
 ### 安装Hook
 
-![](assets/zh_CN/01_hook_install.jpg)
+![](assets/zh_CN/02_hook_install.jpg)
 
 ### 权限快速开关控制
 
@@ -207,6 +210,11 @@ cargo test
 | UI 组件 | Radix UI |
 | 状态管理 | Zustand |
 | 国际化 | i18next |
+| 构建工具 | Vite |
+| 动画 | Framer Motion |
+| 表单验证 | React Hook Form + Zod |
+| 图标 | Lucide React |
+| 通知提示 | Sonner |
 | 桌面框架 | Tauri 2.0 |
 | 后端语言 | Rust |
 
@@ -279,6 +287,17 @@ src-tauri/
 1. 代码通过类型检查 (`pnpm typecheck`)
 2. 代码已格式化 (`pnpm format`)
 3. 提交信息清晰明了
+
+---
+
+## 致谢
+
+本项目的灵感来源于以下优秀项目：
+
+- [CC Switch](https://github.com/farion1231/cc-switch) - Claude Code 权限切换工具
+- [Cline](https://github.com/cline/cline) - 优秀的 AI 编程助手
+
+感谢这些项目的作者们！
 
 ---
 
