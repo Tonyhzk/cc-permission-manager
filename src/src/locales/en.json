@@ -164,6 +164,7 @@
     "locatePermissions": "Locate permissions.json",
     "locateSettings": "Locate settings.json",
     "locateHook": "Locate unified-hook.py",
+    "locateHookLog": "Locate Hook Log",
     "reload": "Reload Configuration",
     "error": "Error"
   },

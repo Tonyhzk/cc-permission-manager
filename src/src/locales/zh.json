@@ -164,6 +164,7 @@
     "locatePermissions": "定位 permissions.json",
     "locateSettings": "定位 settings.json",
     "locateHook": "定位 unified-hook.py",
+    "locateHookLog": "定位 Hook 日志",
     "reload": "重新加载配置",
     "error": "错误"
   },

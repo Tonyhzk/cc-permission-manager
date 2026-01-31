@@ -42,6 +42,7 @@
       "jsonParseFailed": "JSON 解析失败: {error}",
       "readInputFailed": "读取输入失败: {error}",
       "modeNotFound": "错误: 找不到模式 {mode}",
+      "dontAskModeAutoApprove": "dontAsk 模式，自动通过",
       "splitCommands": "拆分为 {count} 个子命令: {commands}"
     }
   }

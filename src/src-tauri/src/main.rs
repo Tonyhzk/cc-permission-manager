@@ -27,6 +27,7 @@ fn main() {
             commands::open_environment_variables,
             commands::open_macos_full_disk_access,
             commands::check_macos_file_access,
+            commands::locate_hook_log,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

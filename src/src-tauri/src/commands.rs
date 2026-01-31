@@ -648,6 +648,26 @@ pub fn open_macos_full_disk_access() -> Result<(), String> {
     }
 }
 
+/// Locate hook debug log file using the unified-hook.py script
+#[tauri::command]
+pub fn locate_hook_log(hook_script_path: String) -> Result<(), String> {
+    use std::process::Command;
+
+    // Get the Python command
+    let python_result = check_python_command();
+    if !python_result.found_in_path {
+        return Err("Python not found in PATH".to_string());
+    }
+
+    // Run: python unified-hook.py --locate-log
+    Command::new(&python_result.command)
+        .args([&hook_script_path, "--locate-log"])
+        .spawn()
+        .map_err(|e| format!("Failed to locate hook log: {}", e))?;
+
+    Ok(())
+}
+
 /// Check if the app has full disk access on macOS
 /// Returns true if access is granted or not applicable (non-macOS)
 #[tauri::command]

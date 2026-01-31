@@ -302,7 +302,7 @@ dependencies = [
 
 [[package]]
 name = "cc-permission-manager"
-version = "0.3.9"
+version = "0.4.0"
 dependencies = [
  "dirs 5.0.1",
  "rodio",

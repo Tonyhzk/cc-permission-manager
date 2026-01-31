@@ -14,16 +14,73 @@ import subprocess
 from datetime import datetime
 import platform
 
-# Debug log path
-if platform.system() == "Windows":
-    DEBUG_LOG = os.path.join(os.environ.get("TEMP", "C:\\Temp"), "claude-hook-debug.log")
-else:
-    DEBUG_LOG = "/tmp/claude-hook-debug.log"
+# Debug log path - located next to this script
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+DEBUG_LOG = os.path.join(SCRIPT_DIR, "hook-debug.log")
+
+
+def locate_log_file():
+    """Open file explorer and select the log file"""
+    system = platform.system()
+
+    if not os.path.exists(DEBUG_LOG):
+        print(f"Log file does not exist: {DEBUG_LOG}")
+        sys.exit(1)
+
+    try:
+        if system == "Windows":
+            # Windows: explorer /select,<path>
+            subprocess.run(["explorer", "/select,", DEBUG_LOG], check=False)
+        elif system == "Darwin":
+            # macOS: open -R <path>
+            subprocess.run(["open", "-R", DEBUG_LOG], check=False)
+        else:
+            # Linux: try different file managers
+            log_dir = os.path.dirname(DEBUG_LOG)
+            # Try nautilus (GNOME) with --select first
+            if subprocess.run(["which", "nautilus"], capture_output=True).returncode == 0:
+                subprocess.run(["nautilus", "--select", DEBUG_LOG], check=False)
+            # Try dolphin (KDE)
+            elif subprocess.run(["which", "dolphin"], capture_output=True).returncode == 0:
+                subprocess.run(["dolphin", "--select", DEBUG_LOG], check=False)
+            # Try nemo (Cinnamon)
+            elif subprocess.run(["which", "nemo"], capture_output=True).returncode == 0:
+                subprocess.run(["nemo", DEBUG_LOG], check=False)
+            # Fallback: just open the directory
+            else:
+                subprocess.run(["xdg-open", log_dir], check=False)
+
+        print(f"Opened: {DEBUG_LOG}")
+        sys.exit(0)
+    except Exception as e:
+        print(f"Failed to locate log file: {e}")
+        sys.exit(1)
+
+
+# Max log file size (1MB)
+MAX_LOG_SIZE = 20 * 1024 * 1024
 
 
 def log_debug(message):
-    """Write debug log"""
+    """Write debug log with auto cleanup when file exceeds MAX_LOG_SIZE"""
     try:
+        # Check file size and truncate if needed
+        if os.path.exists(DEBUG_LOG):
+            file_size = os.path.getsize(DEBUG_LOG)
+            if file_size > MAX_LOG_SIZE:
+                # Keep the last 20% of the file
+                keep_size = MAX_LOG_SIZE // 5
+                with open(DEBUG_LOG, "rb") as f:
+                    f.seek(-keep_size, 2)  # Seek from end
+                    content = f.read()
+                # Find the first newline to avoid partial line
+                newline_pos = content.find(b'\n')
+                if newline_pos != -1:
+                    content = content[newline_pos + 1:]
+                with open(DEBUG_LOG, "wb") as f:
+                    f.write(b"[Log truncated due to size limit]\n")
+                    f.write(content)
+
         with open(DEBUG_LOG, "a", encoding="utf-8") as f:
             f.write(f"{message}\n")
     except Exception:
@@ -476,8 +533,13 @@ def handle_pre_tool_use_hook(hook_data, permissions):
     # Get current mode configuration
     mode = permissions.get("modes", {}).get(cli_permission_mode, {})
     if not mode:
-        log_debug(t('hook.log.modeNotFound', mode=cli_permission_mode))
-        output_result("PreToolUse", permissionDecision="ask")
+        # dontAsk mode (used by sub-agents) - auto approve all
+        if cli_permission_mode == "dontAsk":
+            log_debug(t('hook.log.dontAskModeAutoApprove'))
+            output_result("PreToolUse", permissionDecision="allow")
+        else:
+            log_debug(t('hook.log.modeNotFound', mode=cli_permission_mode))
+            output_result("PreToolUse", permissionDecision="ask")
 
     # Extract command (if Bash)
     command = ""
@@ -608,6 +670,12 @@ def handle_pre_tool_use_hook(hook_data, permissions):
 
 def main():
     """Main function - Dispatch handling based on event type"""
+
+    # Handle --locate-log argument
+    if len(sys.argv) > 1 and sys.argv[1] == "--locate-log":
+        locate_log_file()
+        return
+
     log_debug(f"\n=== {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ===")
 
     # Read JSON input from stdin

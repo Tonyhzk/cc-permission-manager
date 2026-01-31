@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next';
-import { FolderOpen, FileText, RefreshCw } from 'lucide-react';
+import { FolderOpen, FileText, RefreshCw, ScrollText } from 'lucide-react';
 import { Button } from '@/components/ui';
 import { invoke } from '@tauri-apps/api/core';
 import { join } from '@tauri-apps/api/path';
@@ -61,6 +61,18 @@ export function QuickActions() {
     }
   };
 
+  // 定位 hook 日志文件
+  const handleLocateHookLog = async () => {
+    try {
+      const claudeDir = await getEffectiveClaudeDir();
+      const hookPath = await join(claudeDir, 'hooks', 'unified-hook.py');
+      await invoke('locate_hook_log', { hookScriptPath: hookPath });
+    } catch (error) {
+      console.error('Failed to locate hook log:', error);
+      alert(`${t('quickActions.error')}: ${error}`);
+    }
+  };
+
   // 重新加载配置
   const handleReload = async () => {
     setIsReloading(true);
@@ -114,6 +126,16 @@ export function QuickActions() {
       >
         <FileText className="w-4 h-4" />
         {t('quickActions.locateHook')}
+      </Button>
+
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={handleLocateHookLog}
+        className="gap-2"
+      >
+        <ScrollText className="w-4 h-4" />
+        {t('quickActions.locateHookLog')}
       </Button>
 
       <Button

@@ -42,6 +42,7 @@
       "jsonParseFailed": "JSON parsing failed: {error}",
       "readInputFailed": "Failed to read input: {error}",
       "modeNotFound": "Error: mode not found {mode}",
+      "dontAskModeAutoApprove": "dontAsk mode, auto approve",
       "splitCommands": "Split into {count} sub-commands: {commands}"
     }
   }
