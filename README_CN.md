@@ -294,7 +294,7 @@ src-tauri/
 
 本项目的灵感来源于以下优秀项目：
 
-- [CC Switch](https://github.com/farion1231/cc-switch) - Claude Code 权限切换工具
+- [CC Switch](https://github.com/farion1231/cc-switch) - Claude Code、Codex 和 Gemini CLI 的多功能助手
 - [Cline](https://github.com/cline/cline) - 优秀的 AI 编程助手
 
 感谢这些项目的作者们！

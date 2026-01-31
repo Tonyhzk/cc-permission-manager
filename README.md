@@ -294,7 +294,7 @@ Pull requests are welcome! Before submitting, please ensure:
 
 This project was inspired by the following excellent projects:
 
-- [CC Switch](https://github.com/farion1231/cc-switch) - Claude Code permission switch tool
+- [CC Switch](https://github.com/farion1231/cc-switch) - All-in-One Assistant for Claude Code, Codex & Gemini CLI
 - [Cline](https://github.com/cline/cline) - An excellent AI coding assistant
 
 Thanks to the authors of these projects!
