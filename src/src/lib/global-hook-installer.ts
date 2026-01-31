@@ -3,6 +3,7 @@ import { join } from '@tauri-apps/api/path';
 import { platform } from '@tauri-apps/plugin-os';
 import { generatePermissionsConfig, generateSettingsConfig, generateHookScript, type Language } from './config-generator';
 import { useWorkspaceStore } from '@/stores/workspace-store';
+import { getPythonCommand, resetPythonCommandCache, type PythonStatusCallback } from './python-detector';
 
 export interface InstallResult {
   success: boolean;
@@ -61,9 +62,16 @@ export async function getSettingsFileName(claudeDir: string): Promise<string> {
 /**
  * 安装 hooks 到指定目录
  */
-export async function installHooks(language: Language, claudeDir?: string): Promise<InstallResult> {
+export async function installHooks(
+  language: Language,
+  claudeDir?: string,
+  onPythonStatusChange?: PythonStatusCallback
+): Promise<InstallResult> {
   try {
-    // 1. 获取目标目录
+    // 1. 清除 Python 命令缓存，确保每次都重新检测
+    resetPythonCommandCache();
+
+    // 2. 获取目标目录
     const targetDir = claudeDir || await getEffectiveClaudeDir();
     const hooksDir = await join(targetDir, 'hooks');
 
@@ -98,13 +106,17 @@ export async function installHooks(language: Language, claudeDir?: string): Prom
     // 6. 设置 hook 脚本为可执行
     await invoke('set_executable', { path: hookDestPath });
 
-    // 7. 获取当前平台并生成 settings 配置
+    // 7. 检测 Python 命令
+    const pythonCommand = await getPythonCommand(onPythonStatusChange);
+
+    // 8. 获取当前平台并生成 settings 配置
     const currentPlatform = await getCurrentPlatform();
-    const platformType = currentPlatform === 'windows' ? 'windows' : 'mac';
-    const settingsContent = await generateSettingsConfig(language, platformType);
+    const platformType = currentPlatform === 'macos' ? 'mac' : currentPlatform;
+    const isGlobal = await isGlobalDir(targetDir);
+    const settingsContent = await generateSettingsConfig(language, targetDir, isGlobal, platformType, pythonCommand);
     const settingsTemplate = JSON.parse(settingsContent);
 
-    // 8. 根据是否为全局目录选择 settings 文件名
+    // 9. 根据是否为全局目录选择 settings 文件名
     const settingsFileName = await getSettingsFileName(targetDir);
     const settingsPath = await join(targetDir, settingsFileName);
     const result = await invoke<InstallResult>('merge_hooks_to_settings', {
@@ -132,9 +144,12 @@ export async function installHooks(language: Language, claudeDir?: string): Prom
 /**
  * 安装全局 hooks 到 ~/.claude（兼容旧 API）
  */
-export async function installGlobalHooks(language: Language): Promise<InstallResult> {
+export async function installGlobalHooks(
+  language: Language,
+  onPythonStatusChange?: PythonStatusCallback
+): Promise<InstallResult> {
   const globalDir = await getGlobalClaudeDir();
-  return installHooks(language, globalDir);
+  return installHooks(language, globalDir, onPythonStatusChange);
 }
 
 /**
@@ -277,7 +292,11 @@ export async function getInstalledHookLanguage(claudeDir?: string): Promise<Lang
 /**
  * 切换已安装的 hook 语言
  */
-export async function switchHookLanguage(newLanguage: Language, claudeDir?: string): Promise<InstallResult> {
+export async function switchHookLanguage(
+  newLanguage: Language,
+  claudeDir?: string,
+  onPythonStatusChange?: PythonStatusCallback
+): Promise<InstallResult> {
   try {
     // 1. 获取目标目录
     const targetDir = claudeDir || await getEffectiveClaudeDir();
@@ -336,10 +355,14 @@ export async function switchHookLanguage(newLanguage: Language, claudeDir?: stri
     // 7. 设置 hook 脚本为可执行
     await invoke('set_executable', { path: hookDestPath });
 
-    // 8. 根据是否为全局目录选择 settings 文件名
+    // 8. 检测 Python 命令
+    const pythonCommand = await getPythonCommand(onPythonStatusChange);
+
+    // 9. 根据是否为全局目录选择 settings 文件名
     const currentPlatform = await getCurrentPlatform();
-    const platformType = currentPlatform === 'windows' ? 'windows' : 'mac';
-    const settingsContent = await generateSettingsConfig(newLanguage, platformType);
+    const platformType = currentPlatform === 'macos' ? 'mac' : currentPlatform;
+    const isGlobal = await isGlobalDir(targetDir);
+    const settingsContent = await generateSettingsConfig(newLanguage, targetDir, isGlobal, platformType, pythonCommand);
     const settingsTemplate = JSON.parse(settingsContent);
 
     const settingsFileName = await getSettingsFileName(targetDir);

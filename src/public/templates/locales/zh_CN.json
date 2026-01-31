@@ -6,10 +6,7 @@
     "notifications": "通知系统配置"
   },
   "settings": {
-    "description": {
-      "mac": "MAC/LINUX 系统",
-      "windows": "WINDOWS 系统"
-    },
+    "description": "Claude Code 权限控制系统",
     "statusMessage": "检查权限..."
   },
   "notifications": {

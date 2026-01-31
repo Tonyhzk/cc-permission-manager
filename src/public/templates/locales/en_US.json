@@ -6,10 +6,7 @@
     "notifications": "Notification system configuration"
   },
   "settings": {
-    "description": {
-      "mac": "MAC/LINUX System",
-      "windows": "WINDOWS System"
-    },
+    "description": "Claude Code Permission Control System",
     "statusMessage": "Checking permissions..."
   },
   "notifications": {

@@ -1,7 +1,7 @@
 {
   "name": "cc-permission-manager",
   "version": "0.1.0",
-  "description": "All-in-One Permission Manager for Claude Code",
+  "description": "A tool for managing Claude Code permission configurations",
   "type": "module",
   "scripts": {
     "dev": "pnpm tauri dev",
@@ -19,7 +19,7 @@
     "tauri",
     "react"
   ],
-  "author": "",
+  "author": "Tonyhzk",
   "license": "MIT",
   "devDependencies": {
     "@tauri-apps/cli": "^2.8.0",

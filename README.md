@@ -1,6 +1,11 @@
 # Claude Code Permission Manager
 
-A desktop application for managing Claude Code permissions and settings.
+[English](README.md) | [中文](README_CN.md)
+
+A tool for managing Claude Code permission configurations.
+
+**Author**: Tonyhzk
+**GitHub**: https://github.com/Tonyhzk/cc-permission-manager
 
 ## Features
 

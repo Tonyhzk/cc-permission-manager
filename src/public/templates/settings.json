@@ -1,6 +1,6 @@
 {
   "_description": {
-    "system": "{{settings.description.mac}}"
+    "system": "{{settings.description}}"
   },
   "alwaysThinkingEnabled": false,
   "hooks": {
@@ -10,7 +10,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\".claude/hooks/unified-hook.py\"",
+            "command": ".claude/hooks/unified-hook.py",
             "statusMessage": "{{settings.statusMessage}}"
           }
         ]
@@ -21,7 +21,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\".claude/hooks/unified-hook.py\"",
+            "command": ".claude/hooks/unified-hook.py",
             "timeout": 10
           }
         ]
@@ -32,7 +32,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "\".claude/hooks/unified-hook.py\"",
+            "command": ".claude/hooks/unified-hook.py",
             "timeout": 5
           }
         ]

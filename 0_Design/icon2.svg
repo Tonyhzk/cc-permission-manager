@@ -1,0 +1,64 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- 定义滤镜和渐变 -->
+  <defs>
+    <!-- 背景主渐变：深海蓝 -->
+    <linearGradient id="bg_gradient" x1="256" y1="0" x2="256" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2D4A8A"/>
+      <stop offset="1" stop-color="#1E325C"/>
+    </linearGradient>
+    
+    <!-- 盾牌渐变：微金属质感 -->
+    <linearGradient id="shield_stroke" x1="256" y1="110" x2="256" y2="400" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.9"/>
+      <stop offset="1" stop-color="#94A3B8" stop-opacity="0.6"/>
+    </linearGradient>
+    
+    <!-- Claude星形渐变：陶土暖橙 -->
+    <linearGradient id="star_gradient" x1="256" y1="190" x2="256" y2="322" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FCA5A5"/> <!-- 亮部 -->
+      <stop offset="1" stop-color="#D97757"/> <!-- 暗部 -->
+    </linearGradient>
+
+    <!-- 外部投影 -->
+    <filter id="drop_shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="8"/>
+      <feOffset dx="0" dy="6" result="offsetblur"/>
+      <feFlood flood-color="rgba(0,0,0,0.3)"/>
+      <feComposite in2="offsetblur" operator="in"/>
+      <feMerge>
+        <feMergeNode/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- 1. 背景容器：圆角矩形 (Squircle) -->
+  <!-- 适用于 macOS/iOS 风格，在 Windows 上也美观 -->
+  <rect x="32" y="32" width="448" height="448" rx="100" fill="url(#bg_gradient)" filter="url(#drop_shadow)"/>
+  
+  <!-- 背景顶部高光线条（增加立体感） -->
+  <path d="M 132 34 H 380 C 434 34 478 78 478 132 V 200" stroke="white" stroke-opacity="0.1" stroke-width="2" fill="none"/>
+
+  <!-- 2. 盾牌主体 -->
+  <!-- 形状说明：经典的盾牌轮廓，描边风格 -->
+  <g transform="translate(0, 15)">
+    <!-- 盾牌背景填充 (半透明) -->
+    <path d="M 256 110 C 256 110 380 125 380 190 C 380 280 340 350 256 395 C 172 350 132 280 132 190 C 132 125 256 110 256 110 Z" 
+          fill="#0F172A" fill-opacity="0.3"/>
+          
+    <!-- 盾牌描边 -->
+    <path d="M 256 110 C 256 110 380 125 380 190 C 380 280 340 350 256 395 C 172 350 132 280 132 190 C 132 125 256 110 256 110 Z" 
+          stroke="url(#shield_stroke)" stroke-width="12" stroke-linejoin="round" stroke-linecap="round"/>
+  </g>
+
+  <!-- 3. 核心元素：Claude 风格四角星 -->
+  <!-- 形状说明：象征 AI 智能与核心代码 -->
+  <g transform="translate(0, 15)">
+    <path d="M 256 175 
+             C 256 175 270 230 320 250 
+             C 270 270 256 325 256 325 
+             C 256 325 242 270 192 250 
+             C 242 230 256 175 256 175 Z" 
+          fill="url(#star_gradient)"/>
+  </g>
+</svg>

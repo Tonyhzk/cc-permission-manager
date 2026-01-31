@@ -1,7 +1,8 @@
 import { useTranslation } from 'react-i18next';
-import { Settings, Globe, Save, RotateCcw, Sun, Moon, Monitor } from 'lucide-react';
+import { Settings, Globe, Save, RotateCcw, Sun, Moon, Monitor, Github } from 'lucide-react';
 import { Button, Badge } from '@/components/ui';
 import { useConfigStore, useThemeStore } from '@/stores';
+import { open } from '@tauri-apps/plugin-shell';
 
 export function Header() {
   const { t, i18n } = useTranslation();
@@ -24,6 +25,10 @@ export function Header() {
 
   const ThemeIcon = theme === 'light' ? Sun : theme === 'dark' ? Moon : Monitor;
 
+  const openGithub = async () => {
+    await open('https://github.com/Tonyhzk/cc-permission-manager');
+  };
+
   return (
     <header className="h-14 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
       <div className="h-full px-4 flex items-center justify-between">
@@ -38,6 +43,15 @@ export function Header() {
         </div>
 
         <div className="flex items-center gap-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={openGithub}
+            title="GitHub Repository"
+          >
+            <Github className="h-4 w-4" />
+          </Button>
+
           <Button
             variant="ghost"
             size="icon"

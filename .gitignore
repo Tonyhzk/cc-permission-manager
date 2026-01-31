@@ -3,10 +3,14 @@
 
 # Dependencies
 node_modules/
+node_modules_mac/
+node_modules_win/
 
 # Build outputs
 dist/
 src/src-tauri/target/
+src/src-tauri/target_mac/
+src/src-tauri/target_win/
 
 # IDE
 .vscode/

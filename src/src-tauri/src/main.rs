@@ -23,6 +23,8 @@ fn main() {
             commands::open_directory,
             commands::get_resource_path,
             commands::play_sound,
+            commands::check_python_command,
+            commands::open_environment_variables,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

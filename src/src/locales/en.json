@@ -1,7 +1,7 @@
 {
   "app": {
     "title": "Claude Code Permission Manager",
-    "description": "Manage permissions and settings for Claude Code"
+    "description": "A tool for managing Claude Code permission configurations"
   },
   "nav": {
     "globalConfig": "Configuration",
@@ -161,6 +161,26 @@
     "locateHook": "Locate unified-hook.py",
     "reload": "Reload Configuration",
     "error": "Error"
+  },
+  "python": {
+    "success": {
+      "title": "Python Detected Successfully",
+      "description": "Using command: {{command}}"
+    },
+    "warning": {
+      "title": "Python Found but Not in PATH",
+      "foundInstallation": "Found Python installation:",
+      "pythonDir": "Python Directory",
+      "scriptsDir": "Scripts Directory",
+      "instruction": "Please add the above directories to your system PATH environment variable"
+    },
+    "error": {
+      "title": "Python Not Found",
+      "windows": "Please install Python and check \"Add Python to PATH\" option",
+      "macos": "Please install Python (recommended: brew install python3)",
+      "linux": "Please install Python using package manager (e.g. sudo apt install python3)"
+    },
+    "close": "Close"
   },
   "workspace": {
     "current": "Workspace",

@@ -83,8 +83,8 @@ export const DEFAULT_PERMISSIONS_CONFIG: PermissionsConfig = {
   },
   notifications: {
     _soundOptions: {
-      macOS: ['default', 'Basso', 'Blow', 'Bottle', 'Frog', 'Funk', 'Glass', 'Hero', 'Morse', 'Ping', 'Pop', 'Purr', 'Sosumi', 'Submarine', 'Tink'],
-      windows: ['default', 'ms-winsoundevent:Notification.Default', 'ms-winsoundevent:Notification.IM', 'ms-winsoundevent:Notification.Mail', 'ms-winsoundevent:Notification.Reminder'],
+      macOS: ['Basso', 'Blow', 'Bottle', 'Frog', 'Funk', 'Glass', 'Hero', 'Morse', 'Ping', 'Pop', 'Purr', 'Sosumi', 'Submarine', 'Tink'],
+      windows: ['tada', 'chimes', 'chord', 'ding', 'notify', 'recycle', 'ringout'],
     },
     enabled: 1,
     onCompletion: {
@@ -92,14 +92,14 @@ export const DEFAULT_PERMISSIONS_CONFIG: PermissionsConfig = {
       title: 'Task Completed',
       message: 'Claude Code has finished the task',
       sound: 'Glass',
-      soundWindows: 'ms-winsoundevent:Notification.Default',
+      soundWindows: 'tada',
     },
     onPermissionRequest: {
       enabled: 1,
       title: 'Permission Required',
       message: 'Claude Code needs your approval',
       sound: 'Ping',
-      soundWindows: 'ms-winsoundevent:Notification.IM',
+      soundWindows: 'chimes',
     },
   },
 };

@@ -66,20 +66,98 @@ export async function generatePermissionsConfig(language: Language): Promise<Per
 
 /**
  * 生成 settings.json 内容（读取模板并替换语言键）
+ * @param language 语言
+ * @param claudeDir Claude 目录路径
+ * @param isGlobal 是否为全局目录
+ * @param platform 平台类型
+ * @param pythonCommand Python 命令名称 (python 或 python3)
  */
 export async function generateSettingsConfig(
   language: Language,
-  platform: 'mac' | 'windows'
+  claudeDir: string,
+  isGlobal: boolean,
+  platform: 'mac' | 'windows' | 'linux',
+  pythonCommand: string = 'python'
 ): Promise<string> {
-  // 读取 settings 模板
-  const templateContent = await readTemplateFile(`settings_${platform}.json`);
+  // 读取统一的 settings 模板
+  const templateContent = await readTemplateFile('settings.json');
 
   // 读取语言翻译
   const localeContent = await readTemplateFile(`locales/${language}.json`);
   const translations = JSON.parse(localeContent);
 
   // 替换模板中的语言键
-  return replaceTemplateKeys(templateContent, translations, language);
+  let settingsContent = replaceTemplateKeys(templateContent, translations, language);
+
+  // 解析 JSON 以进行路径处理
+  const settings = JSON.parse(settingsContent);
+
+  // 处理 hook 命令路径
+  const processHookCommand = (command: string): string => {
+    let hookPath = command;
+
+    // 如果是全局目录，转换为绝对路径
+    if (isGlobal) {
+      // 将相对路径替换为绝对路径
+      hookPath = hookPath.replace('.claude/hooks/unified-hook.py', `${claudeDir}/hooks/unified-hook.py`);
+    }
+
+    // Windows 平台需要转换路径分隔符
+    if (platform === 'windows') {
+      // 标准化路径分隔符为反斜杠
+      hookPath = hookPath.replace(/\//g, '\\');
+    }
+
+    // 统一添加 python 前缀和引号（所有平台）
+    hookPath = `${pythonCommand} "${hookPath}"`;
+
+    return hookPath;
+  };
+
+  // 更新所有 hook 命令
+  if (settings.hooks) {
+    // PreToolUse hooks
+    if (settings.hooks.PreToolUse) {
+      for (const rule of settings.hooks.PreToolUse) {
+        if (rule.hooks) {
+          for (const hook of rule.hooks) {
+            if (hook.type === 'command' && hook.command) {
+              hook.command = processHookCommand(hook.command);
+            }
+          }
+        }
+      }
+    }
+
+    // Stop hooks
+    if (settings.hooks.Stop) {
+      for (const rule of settings.hooks.Stop) {
+        if (rule.hooks) {
+          for (const hook of rule.hooks) {
+            if (hook.type === 'command' && hook.command) {
+              hook.command = processHookCommand(hook.command);
+            }
+          }
+        }
+      }
+    }
+
+    // PermissionRequest hooks
+    if (settings.hooks.PermissionRequest) {
+      for (const rule of settings.hooks.PermissionRequest) {
+        if (rule.hooks) {
+          for (const hook of rule.hooks) {
+            if (hook.type === 'command' && hook.command) {
+              hook.command = processHookCommand(hook.command);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // 返回处理后的 JSON 字符串
+  return JSON.stringify(settings, null, 2);
 }
 
 /**

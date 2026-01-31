@@ -9,8 +9,8 @@
   "modes": {
     "plan": {
       "read": 1,
-      "readAllFiles": 0,
-      "edit": 1,
+      "readAllFiles": 1,
+      "edit": 0,
       "editAllFiles": 0,
       "risky": 0,
       "riskyAllFiles": 0,
@@ -35,7 +35,7 @@
     },
     "acceptEdits": {
       "read": 1,
-      "readAllFiles": 0,
+      "readAllFiles": 1,
       "edit": 1,
       "editAllFiles": 0,
       "risky": 0,
@@ -406,14 +406,14 @@
       "title": "{{notifications.onCompletion.title}}",
       "message": "{{notifications.onCompletion.message}}",
       "sound": "Glass",
-      "soundWindows": "Tada"
+      "soundWindows": "tada"
     },
     "onPermissionRequest": {
       "enabled": 1,
       "title": "{{notifications.onPermissionRequest.title}}",
       "message": "{{notifications.onPermissionRequest.message}}",
       "sound": "Submarine",
-      "soundWindows": "Notify"
+      "soundWindows": "notify"
     }
   }
 }

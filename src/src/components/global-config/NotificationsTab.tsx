@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { invoke } from '@tauri-apps/api/core';
 import { Volume2 } from 'lucide-react';
 import { useConfigStore } from '@/stores';
+import { getCurrentPlatform, type Platform } from '@/lib/global-hook-installer';
 import {
   Card,
   CardContent,
@@ -27,27 +28,21 @@ export function NotificationsTab() {
   const { notifications } = config;
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [currentSoundTarget, setCurrentSoundTarget] = useState<'onCompletion' | 'onPermissionRequest' | null>(null);
+  const [currentPlatform, setCurrentPlatform] = useState<Platform>('macos');
 
-  const soundOptions = notifications._soundOptions?.macOS || [
-    'default',
-    'Basso',
-    'Blow',
-    'Bottle',
-    'Frog',
-    'Funk',
-    'Glass',
-    'Hero',
-    'Morse',
-    'Ping',
-    'Pop',
-    'Purr',
-    'Sosumi',
-    'Submarine',
-    'Tink',
-  ];
+  useEffect(() => {
+    getCurrentPlatform().then(setCurrentPlatform);
+  }, []);
+
+  const soundOptions = currentPlatform === 'windows'
+    ? (notifications._soundOptions?.windows || ['default'])
+    : (notifications._soundOptions?.macOS || ['default']);
+
+  // 根据平台选择声音字段
+  const soundField = currentPlatform === 'windows' ? 'soundWindows' : 'sound';
 
   const handleSoundChange = async (value: string, target: 'onCompletion' | 'onPermissionRequest') => {
-    updateNotificationSetting(`${target}.sound`, value);
+    updateNotificationSetting(`${target}.${soundField}`, value);
     // Play sound preview when selecting
     try {
       await invoke('play_sound', { soundName: value });
@@ -63,8 +58,14 @@ export function NotificationsTab() {
 
   const handleSelectSoundFromDialog = (sound: string) => {
     if (currentSoundTarget) {
-      updateNotificationSetting(`${currentSoundTarget}.sound`, sound);
+      updateNotificationSetting(`${currentSoundTarget}.${soundField}`, sound);
     }
+  };
+
+  // 获取当前平台的声音值
+  const getSound = (target: 'onCompletion' | 'onPermissionRequest') => {
+    const setting = notifications[target];
+    return currentPlatform === 'windows' ? setting.soundWindows : setting.sound;
   };
 
   return (
@@ -135,7 +136,7 @@ export function NotificationsTab() {
             <Label>{t('notifications.sound')}</Label>
             <div className="flex gap-2">
               <Select
-                value={notifications.onCompletion.sound}
+                value={getSound('onCompletion')}
                 onValueChange={(value) => handleSoundChange(value, 'onCompletion')}
               >
                 <SelectTrigger className="flex-1">
@@ -201,7 +202,7 @@ export function NotificationsTab() {
             <Label>{t('notifications.sound')}</Label>
             <div className="flex gap-2">
               <Select
-                value={notifications.onPermissionRequest.sound}
+                value={getSound('onPermissionRequest')}
                 onValueChange={(value) => handleSoundChange(value, 'onPermissionRequest')}
               >
                 <SelectTrigger className="flex-1">

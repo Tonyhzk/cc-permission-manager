@@ -25,6 +25,7 @@ import {
 } from '@/lib/global-hook-installer';
 import { useConfigStore, useWorkspaceStore } from '@/stores';
 import { CheckCircle2, XCircle, Download, Trash2, Loader2, Languages } from 'lucide-react';
+import { PythonStatusCard, type PythonStatus } from './PythonStatusCard';
 
 export function GlobalHookInstaller() {
   const { t, i18n } = useTranslation();
@@ -38,6 +39,7 @@ export function GlobalHookInstaller() {
   const [installedLanguage, setInstalledLanguage] = useState<Language | null>(null);
   const [isSwitchingLanguage, setIsSwitchingLanguage] = useState(false);
   const [settingsFileName, setSettingsFileName] = useState('settings.json');
+  const [pythonStatus, setPythonStatus] = useState<PythonStatus>(null);
 
   // 检查安装状态
   const checkInstallStatus = async () => {
@@ -88,7 +90,9 @@ export function GlobalHookInstaller() {
     try {
       const language = i18n.language.startsWith('zh') ? 'zh_CN' : 'en_US';
       const claudeDir = await getEffectiveClaudeDir();
-      const result = await installHooks(language as Language, claudeDir);
+      const result = await installHooks(language as Language, claudeDir, (status) => {
+        setPythonStatus(status);
+      });
 
       if (result.success) {
         setMessage({ type: 'success', text: result.message });
@@ -149,7 +153,9 @@ export function GlobalHookInstaller() {
 
     try {
       const claudeDir = await getEffectiveClaudeDir();
-      const result = await switchHookLanguage(newLanguage, claudeDir);
+      const result = await switchHookLanguage(newLanguage, claudeDir, (status) => {
+        setPythonStatus(status);
+      });
 
       if (result.success) {
         setMessage({ type: 'success', text: result.message });
@@ -179,6 +185,12 @@ export function GlobalHookInstaller() {
 
   return (
     <>
+      {/* Python 状态卡片 */}
+      <PythonStatusCard
+        status={pythonStatus}
+        onClose={() => setPythonStatus(null)}
+      />
+
       {!isInstalled ? (
         // 未安装时显示卡片
         <Card>

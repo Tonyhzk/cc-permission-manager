@@ -65,6 +65,7 @@ FOLDERS_TO_SKIP = [
     "node_modules",
     "src/dist",
     "src/src-tauri/target",
+    "src/src-tauri/target_mac",
     ".git"
 ]
 

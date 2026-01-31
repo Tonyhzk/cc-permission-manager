@@ -23,6 +23,8 @@
     "dialog:allow-message",
     "os:default",
     "os:allow-platform",
-    "store:default"
+    "store:default",
+    "shell:default",
+    "shell:allow-open"
   ]
 }
