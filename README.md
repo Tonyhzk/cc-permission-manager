@@ -7,7 +7,6 @@
 
 A visual tool for managing Claude Code permission configurations
 
-[![Version](https://img.shields.io/badge/version-0.3.9-blue.svg)](https://github.com/Tonyhzk/cc-permission-manager/releases)
 [![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20macOS-lightgrey.svg)]()
 [![Tauri](https://img.shields.io/badge/Tauri-2.0-blue?logo=tauri)](https://tauri.app/)
 [![React](https://img.shields.io/badge/React-18-61dafb?logo=react)](https://react.dev/)
