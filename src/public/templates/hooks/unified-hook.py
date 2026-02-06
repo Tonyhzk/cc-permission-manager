@@ -58,7 +58,7 @@ def locate_log_file():
 
 
 # Max log file size (1MB)
-MAX_LOG_SIZE = 20 * 1024 * 1024
+MAX_LOG_SIZE = 1 * 1024 * 1024
 
 
 def log_debug(message):
@@ -575,8 +575,7 @@ def handle_pre_tool_use_hook(hook_data, permissions):
 
     tool_name = hook_data.get("tool_name", "")
     cli_permission_mode = hook_data.get("permission_mode", "default")
-    # Use CLAUDE_PROJECT_DIR env var for project root, fallback to cwd
-    work_dir = os.environ.get("CLAUDE_PROJECT_DIR") or hook_data.get("cwd", "")
+    work_dir = hook_data.get("cwd", "")
 
     log_debug(f"Tool: {tool_name}")
     log_debug(f"CLI Mode: {cli_permission_mode}")

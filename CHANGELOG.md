@@ -8,14 +8,11 @@ All notable changes to this project will be documented in this file.
 
 ## [0.4.3] - 2026-02-07
 
-
-
 ### Added
 - **Message Box Notification** - Added option to use message box, requires user click to continue (can be enabled independently for task completion and permission request)
 
 ### Fixed
 - **Glob Pattern Matching** - Fixed `match_glob` function not matching commands containing newline characters (added `re.DOTALL` flag)
-- **Workspace Detection** - Fixed workspace boundary detection using `cwd` instead of project root. Now uses `CLAUDE_PROJECT_DIR` environment variable to correctly identify project root, preventing files in sibling directories from being incorrectly flagged as "outside workspace"
 
 ## [0.4.1] - 2026-02-02
 
@@ -29,7 +26,7 @@ All notable changes to this project will be documented in this file.
 
 ### Improvements
 - **Hook Log Path Optimization** - Log files now generated in script directory (`.claude/hooks/hook-debug.log`), supporting independent logs per project
-- **Automatic Log Cleanup** - Log files automatically truncated when exceeding 20MB, keeping recent content
+- **Automatic Log Cleanup** - Log files automatically truncated when exceeding 1MB, keeping recent content
 
 ### Fixed
 - Fixed dontAsk mode recognition issue

@@ -68,7 +68,7 @@ FOLDERS_TO_BACKUP = [
 
 # 要打包的文件（支持相对路径和通配符，如 *.bat）
 FILES_TO_BACKUP = [
-    "CLAUDE.md"
+    "*.md"
     # "README.md",
 ]
 
