@@ -29,6 +29,7 @@
       "permissionNotificationDisabled": "权限请求通知未启用",
       "sendingNotification": "发送通知 - 系统: {system}, 标题: {title}, 声音: {sound}",
       "notificationFailed": "发送通知失败: {error}",
+      "messageBoxFailed": "弹窗显示失败: {error}",
       "checkingCommand": "检查子命令: {command}",
       "decision": "决策: {decision}",
       "finalDecision": "最终决策: {decision}",

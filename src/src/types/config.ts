@@ -45,6 +45,7 @@ export interface NotificationItem {
   message: string;
   sound: string;
   soundWindows: string;
+  useMessageBox: number;
 }
 
 /**

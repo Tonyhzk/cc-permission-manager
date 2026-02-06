@@ -91,7 +91,9 @@
     "soundPreviewDesc": "Click on a sound name to preview it, choose your preferred notification sound",
     "playing": "Playing...",
     "play": "Play",
-    "noSound": "No Sound"
+    "noSound": "No Sound",
+    "useMessageBox": "Message Box",
+    "useMessageBoxDesc": "Use message box instead of system notification, requires click to continue"
   },
   "project": {
     "title": "Project Settings",

@@ -160,6 +160,20 @@ export function NotificationsTab() {
               </Button>
             </div>
           </div>
+          <div className="flex items-center justify-between pt-2">
+            <div className="space-y-0.5">
+              <Label>{t('notifications.useMessageBox')}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t('notifications.useMessageBoxDesc')}
+              </p>
+            </div>
+            <Switch
+              checked={notifications.onCompletion.useMessageBox === 1}
+              onCheckedChange={(checked: boolean) =>
+                updateNotificationSetting('onCompletion.useMessageBox', checked ? 1 : 0)
+              }
+            />
+          </div>
         </CardContent>
       </Card>
 
@@ -225,6 +239,20 @@ export function NotificationsTab() {
                 <Volume2 className="h-4 w-4" />
               </Button>
             </div>
+          </div>
+          <div className="flex items-center justify-between pt-2">
+            <div className="space-y-0.5">
+              <Label>{t('notifications.useMessageBox')}</Label>
+              <p className="text-sm text-muted-foreground">
+                {t('notifications.useMessageBoxDesc')}
+              </p>
+            </div>
+            <Switch
+              checked={notifications.onPermissionRequest.useMessageBox === 1}
+              onCheckedChange={(checked: boolean) =>
+                updateNotificationSetting('onPermissionRequest.useMessageBox', checked ? 1 : 0)
+              }
+            />
           </div>
         </CardContent>
       </Card>

@@ -13,6 +13,7 @@ from datetime import datetime
 from pathlib import Path
 import fnmatch
 import glob
+import json
 
 # ==================== 配置区 ====================
 
@@ -34,10 +35,24 @@ def auto_detect_project_name():
     return "project"  # 默认值
 
 
+def get_project_version():
+    """从 package.json 读取项目版本号"""
+    script_dir = Path(__file__).parent
+    project_root = script_dir.parent
+    package_json_path = project_root / "src" / "package.json"
+
+    try:
+        with open(package_json_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            return data.get('version', '')
+    except Exception:
+        return ''
+
+
 # ==================== 常量配置 ====================
 
 # 项目名称（自动检测）
-PROJECT_NAME = auto_detect_project_name()
+PROJECT_NAME = "src"
 
 # 备份目录（相对于脚本所在目录）
 BACKUP_DIR = Path("1_Backup")
@@ -45,8 +60,6 @@ BACKUP_DIR = Path("1_Backup")
 # 要打包的文件夹（支持相对路径）
 FOLDERS_TO_BACKUP = [
     PROJECT_NAME,     # 自动检测的项目目录
-    ".clinerules",
-    ".claude",
     "0_Doc",
     "2_Scripts",
     "src",
@@ -253,9 +266,13 @@ def create_backup():
     # 第四步：执行打包
     print("\n[步骤 4/4] 开始打包...")
 
-    # 生成备份文件名 (格式: YYYYMMDDHHMM_项目名.zip)
+    # 生成备份文件名 (格式: YYYYMMDDHHMM_项目名-版本号.zip)
     timestamp = datetime.now().strftime("%Y%m%d%H%M")
-    backup_name = f"{timestamp}_{PROJECT_NAME}.zip"
+    version = get_project_version()
+    if version:
+        backup_name = f"{timestamp}_{PROJECT_NAME}-{version}.zip"
+    else:
+        backup_name = f"{timestamp}_{PROJECT_NAME}.zip"
     backup_path = BACKUP_DIR / backup_name
 
     # 创建 zip 文件

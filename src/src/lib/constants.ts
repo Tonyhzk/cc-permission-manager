@@ -93,6 +93,7 @@ export const DEFAULT_PERMISSIONS_CONFIG: PermissionsConfig = {
       message: 'Claude Code has finished the task',
       sound: 'Glass',
       soundWindows: 'tada',
+      useMessageBox: 0,
     },
     onPermissionRequest: {
       enabled: 1,
@@ -100,6 +101,7 @@ export const DEFAULT_PERMISSIONS_CONFIG: PermissionsConfig = {
       message: 'Claude Code needs your approval',
       sound: 'Ping',
       soundWindows: 'chimes',
+      useMessageBox: 0,
     },
   },
 };

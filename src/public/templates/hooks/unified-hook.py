@@ -106,7 +106,7 @@ def match_glob(text, pattern):
     """
     regex_pattern = re.escape(pattern)
     regex_pattern = regex_pattern.replace(r'\*', '.*').replace(r'\?', '.')
-    return bool(re.match(f"^{regex_pattern}$", text))
+    return bool(re.match(f"^{regex_pattern}$", text, re.DOTALL))
 
 
 def split_command(command):
@@ -342,6 +342,39 @@ if (Test-Path $soundPath) {{
         log_debug(t('hook.log.notificationFailed', error=str(e)))
 
 
+def show_message_box(title, message):
+    """Show a message box that blocks until user clicks OK"""
+    system = platform.system()
+    log_debug(f"Showing message box: {title} - {message}")
+
+    try:
+        if system == "Darwin":  # macOS
+            script = f'display dialog "{message}" with title "{title}" buttons {{"OK"}} default button "OK"'
+            subprocess.run(["osascript", "-e", script], check=False, capture_output=True)
+
+        elif system == "Linux":
+            # Try zenity first, then kdialog, then xmessage
+            if subprocess.run(["which", "zenity"], capture_output=True).returncode == 0:
+                subprocess.run(["zenity", "--info", "--title", title, "--text", message],
+                             check=False, capture_output=True)
+            elif subprocess.run(["which", "kdialog"], capture_output=True).returncode == 0:
+                subprocess.run(["kdialog", "--msgbox", message, "--title", title],
+                             check=False, capture_output=True)
+            elif subprocess.run(["which", "xmessage"], capture_output=True).returncode == 0:
+                subprocess.run(["xmessage", "-center", message],
+                             check=False, capture_output=True)
+
+        elif system == "Windows":
+            ps_script = f'''
+Add-Type -AssemblyName System.Windows.Forms
+[System.Windows.Forms.MessageBox]::Show("{message}", "{title}", [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Information)
+'''
+            subprocess.run(["powershell", "-Command", ps_script], check=False, capture_output=True)
+
+    except Exception as e:
+        log_debug(t('hook.log.messageBoxFailed', error=str(e)))
+
+
 def handle_stop_hook(hook_data, permissions):
     """Handle Stop event"""
     log_debug(t('hook.log.processing', event='Stop'))
@@ -361,14 +394,23 @@ def handle_stop_hook(hook_data, permissions):
     title = on_completion.get("title", "Claude Code")
     message = on_completion.get("message", t('hook.defaultCompletionMessage'))
 
+    # Check if message box is enabled
+    use_message_box = on_completion.get("useMessageBox", 0) == 1
+
     # Select sound based on system
     if platform.system() == "Windows":
         sound = on_completion.get("soundWindows", "SystemNotification")
     else:
         sound = on_completion.get("sound", "Glass")
 
+    # Send system notification (can work together with message box)
     log_debug(f"Sending completion notification: {title} - {message}")
     send_notification(title, message, sound)
+
+    # Show message box if enabled (blocks until user clicks OK)
+    if use_message_box:
+        log_debug(f"Showing completion message box: {title} - {message}")
+        show_message_box(title, message)
     sys.exit(0)
 
 
@@ -504,17 +546,26 @@ def handle_permission_request_hook(hook_data, permissions):
     title = on_permission.get("title", "Claude Code")
     message = on_permission.get("message", t('hook.defaultPermissionMessage'))
 
+    if tool_name:
+        message = f"{tool_name} - {message}"
+
+    # Check if message box is enabled
+    use_message_box = on_permission.get("useMessageBox", 0) == 1
+
     # Select sound based on system
     if platform.system() == "Windows":
         sound = on_permission.get("soundWindows", "SystemNotification")
     else:
         sound = on_permission.get("sound", "Tink")
 
-    if tool_name:
-        message = f"{tool_name} - {message}"
-
+    # Send system notification (can work together with message box)
     log_debug(f"Sending permission request notification: {title} - {message}")
     send_notification(title, message, sound)
+
+    # Show message box if enabled (blocks until user clicks OK)
+    if use_message_box:
+        log_debug(f"Showing permission request message box: {title} - {message}")
+        show_message_box(title, message)
     sys.exit(0)
 
 
@@ -524,7 +575,8 @@ def handle_pre_tool_use_hook(hook_data, permissions):
 
     tool_name = hook_data.get("tool_name", "")
     cli_permission_mode = hook_data.get("permission_mode", "default")
-    work_dir = hook_data.get("cwd", "")
+    # Use CLAUDE_PROJECT_DIR env var for project root, fallback to cwd
+    work_dir = os.environ.get("CLAUDE_PROJECT_DIR") or hook_data.get("cwd", "")
 
     log_debug(f"Tool: {tool_name}")
     log_debug(f"CLI Mode: {cli_permission_mode}")

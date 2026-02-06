@@ -29,6 +29,7 @@
       "permissionNotificationDisabled": "Permission request notification disabled",
       "sendingNotification": "Sending notification - System: {system}, Title: {title}, Sound: {sound}",
       "notificationFailed": "Sending notification failed: {error}",
+      "messageBoxFailed": "Message box failed: {error}",
       "checkingCommand": "Checking sub-command: {command}",
       "decision": "Decision: {decision}",
       "finalDecision": "Final decision: {decision}",

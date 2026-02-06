@@ -91,7 +91,9 @@
     "soundPreviewDesc": "点击声音名称试听，选择您喜欢的提示音",
     "playing": "播放中...",
     "play": "播放",
-    "noSound": "无声音"
+    "noSound": "无声音",
+    "useMessageBox": "弹窗通知",
+    "useMessageBoxDesc": "使用弹窗代替系统通知，需点击确认后才继续"
   },
   "project": {
     "title": "项目设置",
