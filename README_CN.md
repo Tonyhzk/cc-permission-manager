@@ -298,6 +298,8 @@ src-tauri/
 
 感谢这些项目的作者们！
 
+特别感谢 [LINUX DO](https://linux.do) 社区的支持与推广。
+
 ---
 
 ## 许可证
