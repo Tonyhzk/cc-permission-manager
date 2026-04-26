@@ -11,6 +11,7 @@ export interface ModePermissions {
   useWeb: number;
   useMcp: number;
   allowUnknownCommand: number;
+  allowUnknownTool: number;
   globalAllow: number;
   globalDeny: number;
 }

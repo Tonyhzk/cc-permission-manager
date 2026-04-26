@@ -648,8 +648,13 @@ def handle_pre_tool_use_hook(hook_data, permissions):
         elif check_in_list(tool_name, permissions, "read", "tools"):
             command_category = "read"
         else:
-            log_debug(t('hook.log.decision', decision='Uncategorized tool = ask'))
-            output_result("PreToolUse", permissionDecision="ask")
+            # Uncategorized tool - check allowUnknownTool switch
+            if mode.get("allowUnknownTool") == 1:
+                log_debug(t('hook.log.decision', decision='Uncategorized tool + switch on = allow'))
+                output_result("PreToolUse", permissionDecision="allow")
+            else:
+                log_debug(t('hook.log.decision', decision='Uncategorized tool + switch off = ask'))
+                output_result("PreToolUse", permissionDecision="ask")
 
         # 4. Check if tool operates on files within workspace
         is_in_workspace = True

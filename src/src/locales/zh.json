@@ -41,6 +41,8 @@
     "useMcpDesc": "使用 MCP（模型上下文协议）工具",
     "allowUnknownCommand": "未知命令",
     "allowUnknownCommandDesc": "允许未知/无法识别的命令",
+    "allowUnknownTool": "未知工具",
+    "allowUnknownToolDesc": "允许未知/无法识别的工具",
     "globalAllow": "始终允许",
     "globalAllowDesc": "始终允许列表中的命令",
     "globalDeny": "始终拒绝",

@@ -41,6 +41,8 @@
     "useMcpDesc": "Use MCP (Model Context Protocol) tools",
     "allowUnknownCommand": "Unknown Commands",
     "allowUnknownCommandDesc": "Allow unknown/unrecognized commands",
+    "allowUnknownTool": "Unknown Tools",
+    "allowUnknownToolDesc": "Allow unknown/unrecognized tools",
     "globalAllow": "Always Allow",
     "globalAllowDesc": "Commands in always allow list",
     "globalDeny": "Always Deny",

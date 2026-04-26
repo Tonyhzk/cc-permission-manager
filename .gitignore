@@ -39,3 +39,6 @@ pnpm-debug.log*
 # TypeScript cache
 *.tsbuildinfo
 .claude
+
+# Claude Code project context
+CLAUDE.md

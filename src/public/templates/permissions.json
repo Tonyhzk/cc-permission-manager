@@ -17,6 +17,7 @@
       "useWeb": 1,
       "useMcp": 1,
       "allowUnknownCommand": 0,
+      "allowUnknownTool": 0,
       "globalAllow": 1,
       "globalDeny": 1
     },
@@ -30,6 +31,7 @@
       "useWeb": 1,
       "useMcp": 1,
       "allowUnknownCommand": 0,
+      "allowUnknownTool": 0,
       "globalAllow": 1,
       "globalDeny": 1
     },
@@ -43,6 +45,7 @@
       "useWeb": 1,
       "useMcp": 1,
       "allowUnknownCommand": 0,
+      "allowUnknownTool": 0,
       "globalAllow": 1,
       "globalDeny": 1
     }

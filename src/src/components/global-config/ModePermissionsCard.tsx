@@ -20,6 +20,7 @@ const permissionFields: (keyof ModePermissions)[] = [
   'useWeb',
   'useMcp',
   'allowUnknownCommand',
+  'allowUnknownTool',
   'globalAllow',
   'globalDeny',
 ];
