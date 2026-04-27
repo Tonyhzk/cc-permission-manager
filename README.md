@@ -302,8 +302,6 @@ This project was inspired by the following excellent projects:
 
 Thanks to the authors of these projects!
 
-Special thanks to [LINUX DO](https://linux.do) community for support and promotion.
-
 ---
 
 ## License
