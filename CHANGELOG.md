@@ -9,10 +9,24 @@ All notable changes to this project will be documented in this file.
 ## [0.4.4] - 2026-04-27
 
 ### Added
-- **Unknown Tool Permission Control** - Added `allowUnknownTool` permission switch for unrecognized tools, mirroring the existing `allowUnknownCommand` for unrecognized Bash commands
+- **Unknown Tool Permission Control** - Added `allowUnknownTool` permission switch for unrecognized tools, mirroring the existing `allowUnknownCommand` for unrecognized Bash commands. Previously unrecognized tools always defaulted to "ask" regardless of user settings.
+
+### Changed
+- **Template categories updated** - The default permissions template (`permissions.json`) now includes author's personalized category rules based on real-world usage. Users should adjust these to their own needs:
+  - `read.tools`: Added `ToolSearch`
+  - `read.commands`: Added `sleep *`, `for *`, `do *`, `done`
+  - `risky.tools`: Added `Agent`
+  - `risky.commands`: Wildcard pattern spacing adjusted (e.g. `*rm *` → `* rm *`) for clearer glob matching
+  - `globalAllow.commands`: Added `python*claude*` (excludes Claude-related Python scripts from restrictions)
+  - `globalDeny.tools`: Added `*perplexity_research`, `*perplexity_reason`, `EnterPlanMode`
+  - `acceptEdits` mode: `editAllFiles` default changed from 0 to 1, `allowUnknownCommand` and `allowUnknownTool` changed from 0 to 1
 
 ### Fixed
-- **Hook Script** - Unrecognized tools previously always defaulted to "ask" regardless of user settings; now correctly respects the `allowUnknownTool` switch
+- **Hook Script** - Unrecognized tools previously always returned "ask" regardless of settings; now correctly reads the `allowUnknownTool` switch
+- **Template sync on install** - When `permissions.json` already exists, installation now compares it with the latest template and only fills in missing fields with template defaults, preserving all existing user settings
+
+### Removed
+- **Dead code** - Removed unused `constants.ts` file (`DEFAULT_PERMISSIONS_CONFIG` was never imported anywhere; actual defaults come from the template file)
 
 ## [0.4.3] - 2026-02-07
 

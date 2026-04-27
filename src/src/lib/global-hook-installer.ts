@@ -2,6 +2,7 @@ import { invoke } from '@tauri-apps/api/core';
 import { join } from '@tauri-apps/api/path';
 import { platform } from '@tauri-apps/plugin-os';
 import { generatePermissionsConfig, generateSettingsConfig, generateHookScript, type Language } from './config-generator';
+import type { PermissionsConfig } from '@/types';
 import { useWorkspaceStore } from '@/stores/workspace-store';
 import { getPythonCommand, resetPythonCommandCache, type PythonStatusCallback } from './python-detector';
 
@@ -13,6 +14,37 @@ export interface InstallResult {
 
 export type { Language };
 export type Platform = 'macos' | 'windows' | 'linux';
+
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+function mergeMissingFields<T>(current: T, template: T): T {
+  if (Array.isArray(current) || Array.isArray(template)) {
+    return current ?? template;
+  }
+
+  if (!isPlainObject(current) || !isPlainObject(template)) {
+    return current ?? template;
+  }
+
+  const merged: Record<string, unknown> = { ...current };
+
+  for (const [key, templateValue] of Object.entries(template)) {
+    const currentValue = merged[key];
+
+    if (currentValue === undefined) {
+      merged[key] = templateValue;
+      continue;
+    }
+
+    if (isPlainObject(currentValue) && isPlainObject(templateValue)) {
+      merged[key] = mergeMissingFields(currentValue, templateValue);
+    }
+  }
+
+  return merged as T;
+}
 
 /**
  * 获取当前平台
@@ -82,18 +114,33 @@ export async function installHooks(
     const permissionsConfig = await generatePermissionsConfig(language);
     const permissionsContent = JSON.stringify(permissionsConfig, null, 2);
 
-    // 4. 只在 permissions.json 不存在时才创建
+    // 4. 创建或补全 permissions.json
     const permissionsPath = await join(targetDir, 'permissions.json');
     const permissionsExists = await invoke<boolean>('file_exists', { path: permissionsPath });
 
     if (!permissionsExists) {
-      // 首次安装，创建默认配置
       await invoke('write_config_file', {
         path: permissionsPath,
         content: permissionsContent,
       });
+    } else {
+      const permissionsResult = await invoke<{ success: boolean; content?: string; error?: string }>(
+        'read_config_file',
+        { path: permissionsPath }
+      );
+
+      if (!permissionsResult.success || !permissionsResult.content) {
+        throw new Error(permissionsResult.error || 'Failed to read current permissions.json');
+      }
+
+      const currentPermissions = JSON.parse(permissionsResult.content) as PermissionsConfig;
+      const mergedPermissions = mergeMissingFields(currentPermissions, permissionsConfig);
+
+      await invoke('write_config_file', {
+        path: permissionsPath,
+        content: JSON.stringify(mergedPermissions, null, 2),
+      });
     }
-    // 如果已存在，保留用户配置，不覆盖
 
     // 5. 生成硬编码的 hook 脚本
     const hookScriptContent = await generateHookScript(language);

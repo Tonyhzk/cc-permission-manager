@@ -15,7 +15,7 @@ A visual tool for managing Claude Code permission configurations
 [![Rust](https://img.shields.io/badge/Rust-1.70+-dea584?logo=rust)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-**English** | [中文](README_CN.md) | [Changelog](CHANGELOG.md)
+**English** | [中文](README_CN.md) | [Changelog](CHANGELOG.md) | [LINUX DO Community](https://linux.do)
 
 </div>
 
@@ -148,6 +148,10 @@ The application manages the following configuration files:
 
 - **Windows**: `C:\Users\<username>\.claude\`
 - **macOS**: `/Users/<username>/.claude/`
+
+### About Default Category Rules
+
+The tool and command category rules in the template are based on the author's real-world usage experience, not an official standard. After installation, you can adjust them in the "Categories" tab as needed.
 
 ---
 

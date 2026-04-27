@@ -9,10 +9,24 @@
 ## [0.4.4] - 2026-04-27
 
 ### 新增
-- **未知工具权限控制** - 新增 `allowUnknownTool` 权限开关，用于控制未识别工具的权限行为，与已有的未知命令开关 `allowUnknownCommand` 对应
+- **未知工具权限控制** - 新增 `allowUnknownTool` 权限开关，用于控制未识别工具的权限行为，与已有的未知命令开关 `allowUnknownCommand` 对应。此前未识别的工具无论设置如何都固定返回"询问"。
+
+### 变更
+- **模板分类规则更新** - 默认权限模板（`permissions.json`）现包含作者根据实际使用经验调整的个人化分类规则，用户可按需自行修改：
+  - `read.tools`：新增 `ToolSearch`
+  - `read.commands`：新增 `sleep *`、`for *`、`do *`、`done`
+  - `risky.tools`：新增 `Agent`
+  - `risky.commands`：通配符模式格式调整（如 `*rm *` → `* rm *`），使 Glob 匹配更清晰
+  - `globalAllow.commands`：新增 `python*claude*`（将 Claude 相关 Python 脚本排除在限制之外）
+  - `globalDeny.tools`：新增 `*perplexity_research`、`*perplexity_reason`、`EnterPlanMode`
+  - `acceptEdits` 模式：`editAllFiles` 默认值从 0 改为 1，`allowUnknownCommand` 和 `allowUnknownTool` 从 0 改为 1
 
 ### 修复
 - **Hook 脚本** - 未识别工具此前无论设置如何都固定返回"询问"，现已正确读取 `allowUnknownTool` 开关
+- **安装时模板补全** - 当 `permissions.json` 已存在时，安装流程现在会对比最新模板，只补齐缺失字段并写入模板默认值，用户已有配置保持不变
+
+### 移除
+- **死代码清理** - 移除未使用的 `constants.ts` 文件（`DEFAULT_PERMISSIONS_CONFIG` 从未被任何模块引用，实际默认值由模板文件提供）
 
 ## [0.4.3] - 2026-02-07
 

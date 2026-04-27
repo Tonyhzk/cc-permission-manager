@@ -15,7 +15,7 @@
 [![Rust](https://img.shields.io/badge/Rust-1.70+-dea584?logo=rust)](https://www.rust-lang.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
-[English](README.md) | **中文** | [更新日志](CHANGELOG.md)
+[English](README.md) | **中文** | [更新日志](CHANGELOG.md) | [LINUX DO 社区](https://linux.do)
 
 </div>
 
@@ -148,6 +148,10 @@
 
 - **Windows**: `C:\Users\<用户名>\.claude\`
 - **macOS**: `/Users/<用户名>/.claude/`
+
+### 关于默认分类规则
+
+模板中的工具和命令分类规则基于作者的实际使用经验，并非通用标准。安装后可在应用的「分类」标签页中按需调整。
 
 ---
 
