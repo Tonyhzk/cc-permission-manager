@@ -6,6 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.4.4] - 2026-04-27
+
+### Added
+- **Unknown Tool Permission Control** - Added `allowUnknownTool` permission switch for unrecognized tools, mirroring the existing `allowUnknownCommand` for unrecognized Bash commands
+
+### Fixed
+- **Hook Script** - Unrecognized tools previously always defaulted to "ask" regardless of user settings; now correctly respects the `allowUnknownTool` switch
+
 ## [0.4.3] - 2026-02-07
 
 ### Added
