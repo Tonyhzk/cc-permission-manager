@@ -39,13 +39,13 @@
       "read": 1,
       "readAllFiles": 1,
       "edit": 1,
-      "editAllFiles": 0,
+      "editAllFiles": 1,
       "risky": 0,
       "riskyAllFiles": 0,
       "useWeb": 1,
       "useMcp": 1,
-      "allowUnknownCommand": 0,
-      "allowUnknownTool": 0,
+      "allowUnknownCommand": 1,
+      "allowUnknownTool": 1,
       "globalAllow": 1,
       "globalDeny": 1
     }
@@ -61,7 +61,8 @@
         "TaskGet",
         "TaskList",
         "ListMcpResourcesTool",
-        "ReadMcpResourceTool"
+        "ReadMcpResourceTool",
+        "ToolSearch"
       ],
       "commands": [
         "cat",
@@ -208,7 +209,11 @@
         "id",
         "id *",
         "groups",
-        "groups *"
+        "groups *",
+        "sleep *",
+        "for *",
+        "do *",
+        "done"
       ]
     },
     "edit": {
@@ -251,66 +256,68 @@
       ]
     },
     "risky": {
-      "tools": [],
+      "tools": [
+        "Agent"
+      ],
       "commands": [
         "rm *",
-        "*rm *",
+        "* rm *",
         "rmdir *",
-        "*rmdir *",
+        "* rmdir *",
         "find * -delete*",
-        "*find * -delete*",
+        "* find * -delete*",
         "chmod *",
-        "*chmod *",
+        "* chmod *",
         "chown *",
-        "*chown *",
+        "* chown *",
         "git push*",
-        "*git push*",
+        "* git push*",
         "git pull*",
-        "*git pull*",
+        "* git pull*",
         "git reset*",
-        "*git reset*",
+        "* git reset*",
         "git rebase*",
-        "*git rebase*",
+        "* git rebase*",
         "git merge*",
-        "*git merge*",
+        "* git merge*",
         "git checkout*",
-        "*git checkout*",
+        "* git checkout*",
         "git clean*",
-        "*git clean*",
+        "* git clean*",
         "git stash drop*",
-        "*git stash drop*",
+        "* git stash drop*",
         "git branch -D*",
-        "*git branch -D*",
+        "* git branch -D*",
         "npm uninstall*",
-        "*npm uninstall*",
+        "* npm uninstall*",
         "pnpm uninstall*",
-        "*pnpm uninstall*",
+        "* pnpm uninstall*",
         "pnpm remove*",
-        "*pnpm remove*",
+        "* pnpm remove*",
         "yarn remove*",
-        "*yarn remove*",
+        "* yarn remove*",
         "pip uninstall*",
-        "*pip uninstall*",
+        "* pip uninstall*",
         "cargo remove*",
-        "*cargo remove*",
+        "* cargo remove*",
         "docker rm*",
-        "*docker rm*",
+        "* docker rm*",
         "docker rmi*",
-        "*docker rmi*",
+        "* docker rmi*",
         "docker stop*",
-        "*docker stop*",
+        "* docker stop*",
         "docker kill*",
-        "*docker kill*",
+        "* docker kill*",
         "kubectl delete*",
-        "*kubectl delete*",
+        "* kubectl delete*",
         "kill *",
-        "*kill *",
+        "* kill *",
         "killall *",
-        "*killall *",
+        "* killall *",
         "pkill *",
-        "*pkill *",
+        "* pkill *",
         "sudo *",
-        "*sudo *"
+        "* sudo *"
       ]
     },
     "useWeb": {
@@ -343,10 +350,16 @@
         "ExitPlanMode",
         "Skill"
       ],
-      "commands": []
+      "commands": [
+        "python*claude*"
+      ]
     },
     "globalDeny": {
-      "tools": [],
+      "tools": [
+        "*perplexity_research",
+        "*perplexity_reason",
+        "EnterPlanMode"
+      ],
       "commands": [
         "git push --force*",
         "git push -f*",
