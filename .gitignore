@@ -40,5 +40,3 @@ pnpm-debug.log*
 *.tsbuildinfo
 .claude
 
-# Claude Code project context
-CLAUDE.md
