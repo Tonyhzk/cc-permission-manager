@@ -153,6 +153,10 @@ The application manages the following configuration files:
 
 The tool and command category rules in the template are based on the author's real-world usage experience, not an official standard. After installation, you can adjust them in the "Categories" tab as needed.
 
+### Known Limitations
+
+- **`.claude/` directory protection**: Claude Code has built-in security protection for the `.claude/` directory (including subdirectories like `rules/`, `hooks/`, etc.). Even if the Hook returns `allow`, Claude Code will still prompt for confirmation on file operations targeting this directory. This is a security mechanism built into Claude Code itself and is not controlled by the Hook script. For all other paths, whether inside or outside the workspace, Hook permission decisions work as expected.
+
 ---
 
 ## Development Guide
