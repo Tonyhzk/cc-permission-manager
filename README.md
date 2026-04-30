@@ -61,6 +61,7 @@ A visual tool for managing Claude Code permission configurations
   - Plan Mode
   - Default Mode
   - Accept Edits Mode
+  - Bypass Permissions Mode
 - **Category Management** - Configure tool and command category permissions
 - **Alert Settings** - Customize alert behavior and sounds
 - **Project Settings** - Per-project tool permissions control
@@ -114,7 +115,7 @@ Start CC Permission Manager after installation.
 ### 2. Configure Global Permissions
 
 In the "Global Config" tab:
-- Select the mode to configure (Plan Mode / Default Mode / Accept Edits Mode)
+- Select the mode to configure (Plan Mode / Default Mode / Accept Edits Mode / Bypass Permissions Mode)
 - Set permission levels for each tool category
 - Click "Save" to apply changes
 

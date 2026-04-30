@@ -13,9 +13,11 @@ All notable changes to this project will be documented in this file.
 - **Auto Repair** - When hook configuration is detected as partial (missing events), the app can automatically repair it. Toggle via Switch control, persisted in localStorage, default enabled
 - **Manual Repair Button** - For modified state (user intentionally changed hook commands), only shows a warning with a manual repair button — no auto-overwrite
 - **Status Badges** - Hook status now shows contextual badges: green (installed), yellow (partial/broken), blue (modified)
+- **Bypass Permissions Mode** - New fourth permission mode `bypassPermissions` added alongside Plan, Default, and Accept Edits. This mode has all permissions enabled by default (highest privilege level), corresponding to Claude Code's `--bypass-permissions` flag
 
 ### Changed
 - Version bumped from 0.4.4 to 0.5.0
+- Tauri dependencies pinned to exact versions to prevent cross-platform build drift
 
 ---
 
