@@ -14,13 +14,15 @@
   },
   "modes": {
     "title": "Permission Modes",
-    "description": "Configure permissions for each mode. Claude Code has three operation modes with different permission levels.",
+    "description": "Configure permissions for each mode. Claude Code has four operation modes with different permission levels.",
     "plan": "Plan Mode",
     "planDesc": "When Claude is planning or exploring the codebase",
     "default": "Default Mode",
     "defaultDesc": "Normal operation mode",
     "acceptEdits": "Accept Edits Mode",
-    "acceptEditsDesc": "When auto-accepting edits is enabled"
+    "acceptEditsDesc": "When auto-accepting edits is enabled",
+    "bypassPermissions": "Bypass Permissions Mode",
+    "bypassPermissionsDesc": "When bypass permission checks is enabled (highest permission level)"
   },
   "permissions": {
     "read": "Read",

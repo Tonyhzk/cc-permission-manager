@@ -1,7 +1,7 @@
 {
   "comment": "Claude Code Permission System Configuration",
   "description": {
-    "modes": "Permission switches for three CLI modes",
+    "modes": "Permission switches for four CLI modes",
     "categories": "Command categorization (supports Glob wildcards * and ?)",
     "notifications": "Notification system configuration"
   },

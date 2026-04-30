@@ -5,12 +5,13 @@ import { ModePermissionsCard } from './ModePermissionsCard';
 import { cn } from '@/lib/utils';
 import type { ModeName } from '@/types';
 
-const modes: ModeName[] = ['plan', 'default', 'acceptEdits'];
+const modes: ModeName[] = ['plan', 'default', 'acceptEdits', 'bypassPermissions'];
 
 const modeIcons: Record<ModeName, string> = {
   plan: '📋',
   default: '⚙️',
   acceptEdits: '✏️',
+  bypassPermissions: '🔓',
 };
 
 export function PermissionsTab() {

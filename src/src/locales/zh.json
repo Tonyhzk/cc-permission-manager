@@ -14,13 +14,15 @@
   },
   "modes": {
     "title": "权限模式",
-    "description": "为每个模式配置权限。Claude Code 有三种操作模式，具有不同的权限级别。",
+    "description": "为每个模式配置权限。Claude Code 有四种操作模式，具有不同的权限级别。",
     "plan": "计划模式",
     "planDesc": "当 Claude 在计划或探索代码库时",
     "default": "默认模式",
     "defaultDesc": "正常操作模式",
     "acceptEdits": "自动接受模式",
-    "acceptEditsDesc": "启用自动接受编辑时"
+    "acceptEditsDesc": "启用自动接受编辑时",
+    "bypassPermissions": "绕过权限模式",
+    "bypassPermissionsDesc": "启用绕过权限检查时（最高权限级别）"
   },
   "permissions": {
     "read": "读取",

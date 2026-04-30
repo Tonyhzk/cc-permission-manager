@@ -51,6 +51,7 @@ function mergeWithDefaults(loaded: Partial<PermissionsConfig>, defaults: Permiss
       plan: { ...defaults.modes.plan, ...loaded.modes?.plan },
       default: { ...defaults.modes.default, ...loaded.modes?.default },
       acceptEdits: { ...defaults.modes.acceptEdits, ...loaded.modes?.acceptEdits },
+      bypassPermissions: { ...defaults.modes.bypassPermissions, ...loaded.modes?.bypassPermissions },
     },
     categories: {
       read: {

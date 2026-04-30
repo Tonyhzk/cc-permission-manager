@@ -1,7 +1,7 @@
 {
   "comment": "Claude Code 权限系统统一配置",
   "description": {
-    "modes": "三种 CLI 模式的权限开关配置",
+    "modes": "四种 CLI 模式的权限开关配置",
     "categories": "命令分类定义（支持 Glob 通配符 * 和 ?）",
     "notifications": "通知系统配置"
   },

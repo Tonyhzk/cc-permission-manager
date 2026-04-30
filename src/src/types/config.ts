@@ -77,6 +77,7 @@ export interface PermissionsConfig {
     plan: ModePermissions;
     default: ModePermissions;
     acceptEdits: ModePermissions;
+    bypassPermissions: ModePermissions;
   };
   categories: PermissionCategories;
   notifications: NotificationConfig;
@@ -90,4 +91,4 @@ export type CategoryName = keyof PermissionCategories;
 /**
  * 模式名称
  */
-export type ModeName = 'plan' | 'default' | 'acceptEdits';
+export type ModeName = 'plan' | 'default' | 'acceptEdits' | 'bypassPermissions';

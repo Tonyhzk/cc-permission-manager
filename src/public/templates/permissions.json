@@ -48,6 +48,20 @@
       "allowUnknownTool": 1,
       "globalAllow": 1,
       "globalDeny": 1
+    },
+    "bypassPermissions": {
+      "read": 1,
+      "readAllFiles": 1,
+      "edit": 1,
+      "editAllFiles": 1,
+      "risky": 1,
+      "riskyAllFiles": 1,
+      "useWeb": 1,
+      "useMcp": 1,
+      "allowUnknownCommand": 1,
+      "allowUnknownTool": 1,
+      "globalAllow": 1,
+      "globalDeny": 1
     }
   },
   "categories": {
