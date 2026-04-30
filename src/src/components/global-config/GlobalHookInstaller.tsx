@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+import { Switch } from '@/components/ui/switch';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -17,20 +18,23 @@ import {
 import {
   installHooks,
   uninstallHooks,
-  isHooksInstalled,
+  checkHookStatus,
   switchHookLanguage,
   isGlobalDir,
   type Language,
+  type HookCheckResult,
 } from '@/lib/global-hook-installer';
 import { useConfigStore, useWorkspaceStore } from '@/stores';
-import { CheckCircle2, XCircle, Download, Trash2, Loader2, Languages, RotateCcw } from 'lucide-react';
+import { CheckCircle2, XCircle, Download, Trash2, Loader2, Languages, RotateCcw, AlertTriangle, Wrench } from 'lucide-react';
 import { PythonStatusCard, type PythonStatus } from './PythonStatusCard';
+
+const AUTO_REPAIR_KEY = 'cc-permission-manager-auto-repair';
 
 export function GlobalHookInstaller() {
   const { t, i18n } = useTranslation();
   const { loadConfig, resetToDefaults, saveConfig, config } = useConfigStore();
   const { workspacePath, getEffectiveClaudeDir } = useWorkspaceStore();
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [hookStatus, setHookStatus] = useState<HookCheckResult | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isChecking, setIsChecking] = useState(true);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
@@ -38,32 +42,42 @@ export function GlobalHookInstaller() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isSwitchingLanguage, setIsSwitchingLanguage] = useState(false);
+  const [isRepairing, setIsRepairing] = useState(false);
   const [settingsFileName, setSettingsFileName] = useState('settings.json');
   const [pythonStatus, setPythonStatus] = useState<PythonStatus>(null);
 
+  // 自动修复开关状态（localStorage 持久化，默认开启）
+  const [autoRepairEnabled, setAutoRepairEnabled] = useState(() => {
+    const stored = localStorage.getItem(AUTO_REPAIR_KEY);
+    return stored !== null ? stored === 'true' : true;
+  });
+
   // 从配置中获取当前语言
-  // 如果没有 language 字段，从 _comment 推断（中文注释表示中文配置）
   const getConfigLanguage = (): Language => {
     if (config?.language) {
       return config.language as Language;
     }
-    // 从 _comment 推断：如果包含中文字符，则为中文
-    if (config?._comment && /[\u4e00-\u9fa5]/.test(config._comment)) {
+    if (config?._comment && /[一-龥]/.test(config._comment)) {
       return 'zh_CN';
     }
     return 'en_US';
   };
   const installedLanguage = getConfigLanguage();
 
+  // 保存自动修复开关状态
+  const handleAutoRepairChange = (enabled: boolean) => {
+    setAutoRepairEnabled(enabled);
+    localStorage.setItem(AUTO_REPAIR_KEY, String(enabled));
+  };
+
   // 检查安装状态
   const checkInstallStatus = async () => {
     setIsChecking(true);
     try {
       const claudeDir = await getEffectiveClaudeDir();
-      const installed = await isHooksInstalled(claudeDir);
-      setIsInstalled(installed);
+      const result = await checkHookStatus(claudeDir);
+      setHookStatus(result);
 
-      // 判断 settings 文件名
       const isGlobal = await isGlobalDir(claudeDir);
       setSettingsFileName(isGlobal ? 'settings.json' : 'settings.local.json');
     } catch (error) {
@@ -75,7 +89,22 @@ export function GlobalHookInstaller() {
 
   useEffect(() => {
     checkInstallStatus();
-  }, [workspacePath]); // 当工作目录变化时重新检查
+  }, [workspacePath]);
+
+  // 自动修复：检测到 partial 且自动修复开启时，自动修复
+  // 注意：modified 状态不触发自动修复，因为用户主动改了命令
+  useEffect(() => {
+    if (
+      hookStatus?.status === 'partial' &&
+      autoRepairEnabled &&
+      !isChecking &&
+      !isLoading &&
+      !isRepairing
+    ) {
+      handleRepair();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hookStatus?.status, autoRepairEnabled, isChecking]);
 
   // 成功消息自动消失
   useEffect(() => {
@@ -101,22 +130,15 @@ export function GlobalHookInstaller() {
 
       if (result.success) {
         setMessage({ type: 'success', text: result.message });
-        setIsInstalled(true);
-        // 重新加载配置（会自动获取语言）
         await loadConfig();
       } else {
-        setMessage({
-          type: 'error',
-          text: result.error || result.message,
-        });
+        setMessage({ type: 'error', text: result.error || result.message });
       }
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Unknown error',
-      });
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setIsLoading(false);
+      await checkInstallStatus();
     }
   };
 
@@ -132,20 +154,40 @@ export function GlobalHookInstaller() {
 
       if (result.success) {
         setMessage({ type: 'success', text: result.message });
-        setIsInstalled(false);
       } else {
-        setMessage({
-          type: 'error',
-          text: result.error || result.message,
-        });
+        setMessage({ type: 'error', text: result.error || result.message });
       }
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Unknown error',
-      });
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setIsLoading(false);
+      await checkInstallStatus();
+    }
+  };
+
+  // 修复 hooks 配置
+  const handleRepair = async () => {
+    setIsRepairing(true);
+    setMessage(null);
+
+    try {
+      const language = i18n.language.startsWith('zh') ? 'zh_CN' : 'en_US';
+      const claudeDir = await getEffectiveClaudeDir();
+      const result = await installHooks(language as Language, claudeDir, (status) => {
+        setPythonStatus(status);
+      });
+
+      if (result.success) {
+        setMessage({ type: 'success', text: t('hooks.repairSuccess') });
+        await loadConfig();
+      } else {
+        setMessage({ type: 'error', text: result.error || result.message });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Unknown error' });
+    } finally {
+      setIsRepairing(false);
+      await checkInstallStatus();
     }
   };
 
@@ -162,19 +204,12 @@ export function GlobalHookInstaller() {
 
       if (result.success) {
         setMessage({ type: 'success', text: result.message });
-        // 重新加载配置以同步语言和通知等设置
         await loadConfig();
       } else {
-        setMessage({
-          type: 'error',
-          text: result.error || result.message,
-        });
+        setMessage({ type: 'error', text: result.error || result.message });
       }
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Unknown error',
-      });
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setIsSwitchingLanguage(false);
     }
@@ -192,10 +227,7 @@ export function GlobalHookInstaller() {
       setMessage({ type: 'success', text: t('hooks.resetSuccess') });
       await loadConfig();
     } catch (error) {
-      setMessage({
-        type: 'error',
-        text: error instanceof Error ? error.message : 'Unknown error',
-      });
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
       setIsResetting(false);
     }
@@ -206,16 +238,20 @@ export function GlobalHookInstaller() {
     ? `${workspacePath.replace(/^\/Users\/[^/]+/, '~')}/.claude`
     : '~/.claude';
 
+  // 状态判断
+  const isPartial = hookStatus?.status === 'partial';
+  const isModified = hookStatus?.status === 'modified';
+  const isNotInstalled = hookStatus?.status === 'not_installed' || hookStatus === null;
+
   return (
     <>
-      {/* Python 状态卡片 */}
       <PythonStatusCard
         status={pythonStatus}
         onClose={() => setPythonStatus(null)}
       />
 
-      {!isInstalled ? (
-        // 未安装时显示卡片
+      {isNotInstalled ? (
+        // 未安装：显示安装卡片
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -242,14 +278,10 @@ export function GlobalHookInstaller() {
                 <AlertDescription>{message.text}</AlertDescription>
               </Alert>
             )}
-
             <div className="space-y-2">
               <h4 className="text-sm font-medium">{t('hooks.whatIsThis')}</h4>
-              <p className="text-sm text-muted-foreground">
-                {t('hooks.explanation')}
-              </p>
+              <p className="text-sm text-muted-foreground">{t('hooks.explanation')}</p>
             </div>
-
             <div className="space-y-2">
               <h4 className="text-sm font-medium">{t('hooks.installedFiles')}</h4>
               <ul className="text-sm text-muted-foreground space-y-1">
@@ -258,13 +290,8 @@ export function GlobalHookInstaller() {
                 <li>• {displayDir}/{settingsFileName} (hooks section)</li>
               </ul>
             </div>
-
             <div className="flex gap-2">
-              <Button
-                onClick={handleInstall}
-                disabled={isLoading || isChecking}
-                className="flex-1"
-              >
+              <Button onClick={handleInstall} disabled={isLoading || isChecking} className="flex-1">
                 {isLoading ? (
                   <>
                     <Loader2 className="w-4 h-4 mr-2 animate-spin" />
@@ -281,7 +308,7 @@ export function GlobalHookInstaller() {
           </CardContent>
         </Card>
       ) : (
-        // 已安装时显示按钮组
+        // 已安装 / partial / modified：显示控件区
         <div className="space-y-4">
           {message && (
             <Alert variant={message.type === 'error' ? 'destructive' : 'default'}>
@@ -289,24 +316,119 @@ export function GlobalHookInstaller() {
             </Alert>
           )}
 
-          <div className="flex flex-wrap gap-2">
-            {/* 状态徽章 */}
-            <Badge variant="default" className="bg-green-500">
-              <CheckCircle2 className="w-3 h-3 mr-1" />
-              {t('hooks.installed')}
-            </Badge>
+          {/* Modified 状态提示：用户主动修改了命令，只提示不自动改 */}
+          {isModified && hookStatus && (
+            <Alert className="border-blue-500/50 bg-blue-500/10 text-blue-700 dark:text-blue-400">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <span>
+                    {t('hooks.hookModifiedTitle')}：{hookStatus.modifiedEvents.join(', ')}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRepair}
+                    disabled={isRepairing || isLoading}
+                    className="ml-4 gap-2 shrink-0"
+                  >
+                    {isRepairing ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        {t('hooks.repairing')}
+                      </>
+                    ) : (
+                      <>
+                        <Wrench className="w-3 h-3" />
+                        {t('hooks.repairHook')}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
 
-            {/* 当前语言 */}
+          {/* Partial 状态警告 + 手动修复按钮 */}
+          {isPartial && !autoRepairEnabled && hookStatus && (
+            <Alert variant="destructive" className="border-yellow-500/50 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <span>
+                    {t('hooks.hookBrokenTitle')}：{hookStatus.missingEvents.join(', ')}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRepair}
+                    disabled={isRepairing || isLoading}
+                    className="ml-4 gap-2 shrink-0"
+                  >
+                    {isRepairing ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        {t('hooks.repairing')}
+                      </>
+                    ) : (
+                      <>
+                        <Wrench className="w-3 h-3" />
+                        {t('hooks.repairHook')}
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* 自动修复中提示 */}
+          {isPartial && autoRepairEnabled && isRepairing && (
+            <Alert>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <AlertDescription>{t('hooks.repairingAuto')}</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex flex-wrap items-center gap-2">
+            {/* 状态徽章 */}
+            {isModified ? (
+              <Badge variant="outline" className="border-blue-500 text-blue-600 dark:text-blue-400">
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                {t('hooks.hookModifiedTitle')}
+              </Badge>
+            ) : isPartial ? (
+              <Badge variant="outline" className="border-yellow-500 text-yellow-600 dark:text-yellow-400">
+                <AlertTriangle className="w-3 h-3 mr-1" />
+                {t('hooks.hookBrokenTitle')}
+              </Badge>
+            ) : (
+              <Badge variant="default" className="bg-green-500">
+                <CheckCircle2 className="w-3 h-3 mr-1" />
+                {t('hooks.installed')}
+              </Badge>
+            )}
+
             <Badge variant="outline">
               {installedLanguage === 'zh_CN' ? '中文' : 'English'}
             </Badge>
 
-            {/* 切换语言按钮 */}
+            {/* 自动修复开关 */}
+            <div className="flex items-center gap-2 ml-auto">
+              <span className="text-xs text-muted-foreground">{t('hooks.autoRepair')}</span>
+              <Switch
+                checked={autoRepairEnabled}
+                onCheckedChange={handleAutoRepairChange}
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleSwitchLanguage(installedLanguage === 'zh_CN' ? 'en_US' : 'zh_CN')}
-              disabled={isSwitchingLanguage || isLoading}
+              disabled={isSwitchingLanguage || isLoading || isRepairing}
               className="gap-2"
             >
               {isSwitchingLanguage ? (
@@ -322,12 +444,11 @@ export function GlobalHookInstaller() {
               )}
             </Button>
 
-            {/* 重置配置按钮 */}
             <Button
               variant="outline"
               size="sm"
               onClick={() => setShowResetDialog(true)}
-              disabled={isResetting || isLoading}
+              disabled={isResetting || isLoading || isRepairing}
               className="gap-2"
             >
               {isResetting ? (
@@ -343,10 +464,9 @@ export function GlobalHookInstaller() {
               )}
             </Button>
 
-            {/* 卸载按钮 */}
             <Button
               onClick={() => setShowUninstallDialog(true)}
-              disabled={isLoading || isChecking}
+              disabled={isLoading || isChecking || isRepairing}
               variant="destructive"
               size="sm"
               className="gap-2"

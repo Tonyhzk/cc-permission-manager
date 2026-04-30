@@ -6,6 +6,19 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [0.5.0] - 2026-05-01
+
+### Added
+- **Hook Configuration Health Check** - New `checkHookStatus()` function that detects four states: installed, partial, modified, and not_installed. Distinguishes between missing hook events (partial) and user-modified hook commands (modified)
+- **Auto Repair** - When hook configuration is detected as partial (missing events), the app can automatically repair it. Toggle via Switch control, persisted in localStorage, default enabled
+- **Manual Repair Button** - For modified state (user intentionally changed hook commands), only shows a warning with a manual repair button — no auto-overwrite
+- **Status Badges** - Hook status now shows contextual badges: green (installed), yellow (partial/broken), blue (modified)
+
+### Changed
+- Version bumped from 0.4.4 to 0.5.0
+
+---
+
 ## [0.4.4] - 2026-04-27
 
 ### Added

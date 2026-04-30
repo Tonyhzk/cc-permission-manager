@@ -160,7 +160,16 @@
     "resetting": "重置中...",
     "resetConfirmTitle": "确认重置",
     "resetConfirmMessage": "此操作将把所有权限配置恢复到默认状态，您的自定义设置将丢失。确定要继续吗？",
-    "resetSuccess": "配置已重置为默认值"
+    "resetSuccess": "配置已重置为默认值",
+    "hookBrokenTitle": "Hook 配置异常",
+    "hookBrokenDesc": "settings.json 中的 Hook 配置被外部修改，部分事件已丢失：{{events}}",
+    "repairHook": "修复配置",
+    "repairing": "正在修复...",
+    "repairSuccess": "Hook 配置已修复",
+    "autoRepair": "自动修复",
+    "repairingAuto": "正在自动修复 Hook 配置...",
+    "hookModifiedTitle": "Hook 命令被修改",
+    "hookModifiedDesc": "以下事件的命令已被手动修改，不会自动覆盖：{{events}}"
   },
   "quickActions": {
     "title": "快捷操作",

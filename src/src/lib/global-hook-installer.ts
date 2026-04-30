@@ -253,7 +253,182 @@ export async function uninstallGlobalHooks(): Promise<InstallResult> {
 }
 
 /**
- * 检查 hooks 是否已安装
+ * Hook 安装状态类型
+ */
+export type HookInstallStatus = 'installed' | 'partial' | 'not_installed' | 'modified';
+
+/**
+ * Hook 检测结果
+ */
+export interface HookCheckResult {
+  status: HookInstallStatus;
+  scriptExists: boolean;       // unified-hook.py 是否存在
+  permissionsExist: boolean;   // permissions.json 是否存在
+  settingsHooksValid: boolean; // settings.json hooks 配置是否完整
+  missingEvents: string[];     // 缺失的 hook 事件名
+  modifiedEvents: string[];    // 命令内容被修改的事件名（事件存在但不含 unified-hook.py）
+}
+
+/**
+ * 需要检测的 hook 事件列表
+ */
+const REQUIRED_HOOK_EVENTS = ['PreToolUse', 'Stop', 'PermissionRequest'] as const;
+
+/**
+ * 检测 Hook 安装状态的详细信息
+ */
+export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResult> {
+  try {
+    const targetDir = claudeDir || await getEffectiveClaudeDir();
+    const hookPath = await join(targetDir, 'hooks', 'unified-hook.py');
+    const permissionsPath = await join(targetDir, 'permissions.json');
+
+    // 检查脚本和配置文件是否存在
+    const scriptExists = await invoke<boolean>('file_exists', { path: hookPath });
+    const permissionsExist = await invoke<boolean>('file_exists', { path: permissionsPath });
+
+    // 如果脚本和配置文件都不存在，属于未安装
+    if (!scriptExists && !permissionsExist) {
+      return {
+        status: 'not_installed',
+        scriptExists: false,
+        permissionsExist: false,
+        settingsHooksValid: false,
+        missingEvents: [...REQUIRED_HOOK_EVENTS],
+        modifiedEvents: [],
+      };
+    }
+
+    // 检查 settings.json 中的 hooks 配置
+    const settingsFileName = await getSettingsFileName(targetDir);
+    const settingsPath = await join(targetDir, settingsFileName);
+    const settingsExists = await invoke<boolean>('file_exists', { path: settingsPath });
+
+    if (!settingsExists) {
+      // settings.json 不存在但脚本/配置在，属于 partial
+      return {
+        status: 'partial',
+        scriptExists,
+        permissionsExist,
+        settingsHooksValid: false,
+        missingEvents: [...REQUIRED_HOOK_EVENTS],
+        modifiedEvents: [],
+      };
+    }
+
+    // 读取 settings.json 检查 hooks 配置
+    const settingsResult = await invoke<{ success: boolean; content?: string; error?: string }>(
+      'read_config_file',
+      { path: settingsPath }
+    );
+
+    if (!settingsResult.success || !settingsResult.content) {
+      return {
+        status: 'partial',
+        scriptExists,
+        permissionsExist,
+        settingsHooksValid: false,
+        missingEvents: [...REQUIRED_HOOK_EVENTS],
+        modifiedEvents: [],
+      };
+    }
+
+    try {
+      const settings = JSON.parse(settingsResult.content);
+      const hooks = settings.hooks;
+
+      if (!hooks || typeof hooks !== 'object') {
+        return {
+          status: 'partial',
+          scriptExists,
+          permissionsExist,
+          settingsHooksValid: false,
+          missingEvents: [...REQUIRED_HOOK_EVENTS],
+          modifiedEvents: [],
+        };
+      }
+
+      // 检查每个必要的 hook 事件
+      const missingEvents: string[] = [];
+      const modifiedEvents: string[] = [];
+      for (const eventName of REQUIRED_HOOK_EVENTS) {
+        const eventHooks = hooks[eventName];
+        if (!Array.isArray(eventHooks) || eventHooks.length === 0) {
+          // 事件完全缺失
+          missingEvents.push(eventName);
+          continue;
+        }
+
+        // 检查事件中是否有指向 unified-hook.py 的 hook
+        const hasOurHook = eventHooks.some((rule: any) => {
+          if (!rule.hooks || !Array.isArray(rule.hooks)) return false;
+          return rule.hooks.some((hook: any) =>
+            hook.type === 'command' && hook.command && hook.command.includes('unified-hook.py')
+          );
+        });
+
+        if (!hasOurHook) {
+          // 事件存在但命令被修改了（不含 unified-hook.py）
+          modifiedEvents.push(eventName);
+        }
+      }
+
+      if (missingEvents.length === 0 && modifiedEvents.length === 0) {
+        return {
+          status: 'installed',
+          scriptExists,
+          permissionsExist,
+          settingsHooksValid: true,
+          missingEvents: [],
+          modifiedEvents: [],
+        };
+      }
+
+      // 只有缺失事件（没有修改事件） → partial，可以自动修复
+      if (modifiedEvents.length === 0) {
+        return {
+          status: 'partial',
+          scriptExists,
+          permissionsExist,
+          settingsHooksValid: false,
+          missingEvents,
+          modifiedEvents: [],
+        };
+      }
+
+      // 有修改事件 → modified，只提示不自动修复
+      return {
+        status: 'modified',
+        scriptExists,
+        permissionsExist,
+        settingsHooksValid: false,
+        missingEvents,
+        modifiedEvents,
+      };
+    } catch {
+      return {
+        status: 'partial',
+        scriptExists,
+        permissionsExist,
+        settingsHooksValid: false,
+        missingEvents: [...REQUIRED_HOOK_EVENTS],
+        modifiedEvents: [],
+      };
+    }
+  } catch {
+    return {
+      status: 'not_installed',
+      scriptExists: false,
+      permissionsExist: false,
+      settingsHooksValid: false,
+      missingEvents: [...REQUIRED_HOOK_EVENTS],
+      modifiedEvents: [],
+    };
+  }
+}
+
+/**
+ * 检查 hooks 是否已安装（简化版，保留兼容）
  */
 export async function isHooksInstalled(claudeDir?: string): Promise<boolean> {
   try {

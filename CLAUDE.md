@@ -113,6 +113,6 @@ PATH=C:\Users\jjp\.cargo\bin;C:\Users\jjp\AppData\Roaming\npm;%PATH%
 
 ## 当前状态
 
-- 版本：0.4.4
+- 版本：0.5.0
 - 跨平台支持 macOS + Windows
 - 核心功能已可用：全局权限配置、Hook 安装/卸载、提示音设置、项目配置

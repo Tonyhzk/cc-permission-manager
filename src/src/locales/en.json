@@ -160,7 +160,16 @@
     "resetting": "Resetting...",
     "resetConfirmTitle": "Confirm Reset",
     "resetConfirmMessage": "This will restore all permission settings to their default values. Your custom settings will be lost. Are you sure you want to continue?",
-    "resetSuccess": "Configuration has been reset to defaults"
+    "resetSuccess": "Configuration has been reset to defaults",
+    "hookBrokenTitle": "Hook Config Broken",
+    "hookBrokenDesc": "Hook configuration in settings.json was modified externally, missing events: {{events}}",
+    "repairHook": "Repair Config",
+    "repairing": "Repairing...",
+    "repairSuccess": "Hook config repaired successfully",
+    "autoRepair": "Auto Repair",
+    "repairingAuto": "Auto-repairing Hook configuration...",
+    "hookModifiedTitle": "Hook Command Modified",
+    "hookModifiedDesc": "The following events have been manually modified and won't be auto-overwritten: {{events}}"
   },
   "quickActions": {
     "title": "Quick Actions",
