@@ -91,11 +91,10 @@ export function GlobalHookInstaller() {
     checkInstallStatus();
   }, [workspacePath]);
 
-  // 自动修复：检测到 partial 且自动修复开启时，自动修复
-  // 注意：modified 状态不触发自动修复，因为用户主动改了命令
+  // 自动修复：检测到 partial 或 modified 且自动修复开启时，自动修复
   useEffect(() => {
     if (
-      hookStatus?.status === 'partial' &&
+      (hookStatus?.status === 'partial' || hookStatus?.status === 'modified') &&
       autoRepairEnabled &&
       !isChecking &&
       !isLoading &&
@@ -316,8 +315,8 @@ export function GlobalHookInstaller() {
             </Alert>
           )}
 
-          {/* Modified 状态提示：用户主动修改了命令，只提示不自动改 */}
-          {isModified && hookStatus && (
+          {/* Modified 状态提示（自动修复关闭时显示手动修复按钮） */}
+          {isModified && !autoRepairEnabled && hookStatus && (
             <Alert className="border-blue-500/50 bg-blue-500/10 text-blue-700 dark:text-blue-400">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
@@ -346,6 +345,14 @@ export function GlobalHookInstaller() {
                   </Button>
                 </div>
               </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Modified 自动修复中提示 */}
+          {isModified && autoRepairEnabled && isRepairing && (
+            <Alert>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <AlertDescription>{t('hooks.repairingAuto')}</AlertDescription>
             </Alert>
           )}
 

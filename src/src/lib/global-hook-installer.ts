@@ -3,7 +3,7 @@ import { join } from '@tauri-apps/api/path';
 import { platform } from '@tauri-apps/plugin-os';
 import { generatePermissionsConfig, generateSettingsConfig, generateHookScript, type Language } from './config-generator';
 import type { PermissionsConfig } from '@/types';
-import { useWorkspaceStore } from '@/stores/workspace-store';
+import { useConfigStore, useWorkspaceStore } from '@/stores';
 import { getPythonCommand, resetPythonCommandCache, type PythonStatusCallback } from './python-detector';
 
 export interface InstallResult {
@@ -299,20 +299,33 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
       };
     }
 
+    // 检查脚本内容是否与当前模板不同
+    let scriptModified = false;
+    if (scriptExists) {
+      const scriptResult = await invoke<{ success: boolean; content?: string; error?: string }>(
+        'read_config_file',
+        { path: hookPath }
+      );
+      if (scriptResult.success && scriptResult.content) {
+        const currentLanguage = useConfigStore.getState().config?.language || 'zh_CN';
+        const latestScript = await generateHookScript(currentLanguage as Language);
+        scriptModified = scriptResult.content !== latestScript;
+      }
+    }
+
     // 检查 settings.json 中的 hooks 配置
     const settingsFileName = await getSettingsFileName(targetDir);
     const settingsPath = await join(targetDir, settingsFileName);
     const settingsExists = await invoke<boolean>('file_exists', { path: settingsPath });
 
     if (!settingsExists) {
-      // settings.json 不存在但脚本/配置在，属于 partial
       return {
-        status: 'partial',
+        status: scriptModified ? 'modified' : 'partial',
         scriptExists,
         permissionsExist,
         settingsHooksValid: false,
         missingEvents: [...REQUIRED_HOOK_EVENTS],
-        modifiedEvents: [],
+        modifiedEvents: scriptModified ? ['ScriptModified'] : [],
       };
     }
 
@@ -324,12 +337,12 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
 
     if (!settingsResult.success || !settingsResult.content) {
       return {
-        status: 'partial',
+        status: scriptModified ? 'modified' : 'partial',
         scriptExists,
         permissionsExist,
         settingsHooksValid: false,
         missingEvents: [...REQUIRED_HOOK_EVENTS],
-        modifiedEvents: [],
+        modifiedEvents: scriptModified ? ['ScriptModified'] : [],
       };
     }
 
@@ -339,12 +352,12 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
 
       if (!hooks || typeof hooks !== 'object') {
         return {
-          status: 'partial',
+          status: scriptModified ? 'modified' : 'partial',
           scriptExists,
           permissionsExist,
           settingsHooksValid: false,
           missingEvents: [...REQUIRED_HOOK_EVENTS],
-          modifiedEvents: [],
+          modifiedEvents: scriptModified ? ['ScriptModified'] : [],
         };
       }
 
@@ -354,7 +367,6 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
       for (const eventName of REQUIRED_HOOK_EVENTS) {
         const eventHooks = hooks[eventName];
         if (!Array.isArray(eventHooks) || eventHooks.length === 0) {
-          // 事件完全缺失
           missingEvents.push(eventName);
           continue;
         }
@@ -368,9 +380,13 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
         });
 
         if (!hasOurHook) {
-          // 事件存在但命令被修改了（不含 unified-hook.py）
           modifiedEvents.push(eventName);
         }
+      }
+
+      // 脚本内容与模板不同，也加入 modifiedEvents
+      if (scriptModified) {
+        modifiedEvents.push('ScriptModified');
       }
 
       if (missingEvents.length === 0 && modifiedEvents.length === 0) {
@@ -384,7 +400,7 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
         };
       }
 
-      // 只有缺失事件（没有修改事件） → partial，可以自动修复
+      // 只有缺失事件 → partial
       if (modifiedEvents.length === 0) {
         return {
           status: 'partial',
@@ -396,7 +412,7 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
         };
       }
 
-      // 有修改事件 → modified，只提示不自动修复
+      // 有修改事件或脚本内容不同 → modified
       return {
         status: 'modified',
         scriptExists,
@@ -407,12 +423,12 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
       };
     } catch {
       return {
-        status: 'partial',
+        status: scriptModified ? 'modified' : 'partial',
         scriptExists,
         permissionsExist,
         settingsHooksValid: false,
         missingEvents: [...REQUIRED_HOOK_EVENTS],
-        modifiedEvents: [],
+        modifiedEvents: scriptModified ? ['ScriptModified'] : [],
       };
     }
   } catch {
