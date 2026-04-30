@@ -72,6 +72,10 @@ A visual tool for managing Claude Code permission configurations
 - Visual permission editing, no more manual JSON modifications
 - Real-time configuration preview
 - One-click global Hook install/uninstall
+- Hook health check with four states: installed, partial (broken), modified (script changed), not installed
+- Auto repair: automatically fix broken or outdated Hook configs when detected (toggleable)
+- Manual repair button shown when auto repair is disabled
+- Status badges with contextual colors for Hook health
 - Dark/Light theme support
 - Cross-platform support (Windows / macOS)
 
