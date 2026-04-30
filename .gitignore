@@ -40,3 +40,6 @@ pnpm-debug.log*
 *.tsbuildinfo
 .claude
 
+# Temp
+.temp/
+
