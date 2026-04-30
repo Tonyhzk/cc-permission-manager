@@ -6,6 +6,13 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [Unreleased]
+
+### Added
+- **Hook Script Version Detection** - `checkHookStatus()` now compares `unified-hook.py` content with the current template; when the script differs from the template, the status is marked as `modified` instead of `installed`. Auto-repair (when enabled) will overwrite the outdated script with the latest version; manual repair button shown when auto-repair is disabled
+
+---
+
 ## [0.5.0] - 2026-05-01
 
 ### Added
