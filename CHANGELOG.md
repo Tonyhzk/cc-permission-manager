@@ -6,10 +6,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
-## [Unreleased]
+---
 
-### Added
-- **Hook Script Version Detection** - `checkHookStatus()` now compares `unified-hook.py` content with the current template; when the script differs from the template, the status is marked as `modified` instead of `installed`. Auto-repair (when enabled) will overwrite the outdated script with the latest version; manual repair button shown when auto-repair is disabled
+## [0.5.1] - 2026-05-04
+
+### Changed
+- **Separated Settings & Script Detection** - `HookCheckResult.status` now only reflects Settings-level state; script content difference is returned independently via `scriptModified` field. Previously these were mixed into a single `status` value, causing `modified` to shadow `partial` information
+- **Independent Repair Functions** - New `repairSettings()` (merge-patch, preserves user values) and `repairScript()` (full replacement, program-defined logic) replace the single `installHooks()` for repair scenarios
+- **Independent UI Display** - Settings issues and Script issues are shown as separate alerts with separate repair buttons, no longer mutually exclusive
 
 ---
 

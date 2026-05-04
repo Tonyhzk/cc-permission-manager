@@ -169,9 +169,16 @@
     "repairing": "正在修复...",
     "repairSuccess": "Hook 配置已修复",
     "autoRepair": "自动修复",
-    "repairingAuto": "正在自动修复 Hook 配置...",
+    "repairingAuto": "正在自动修复...",
     "hookModifiedTitle": "Hook 命令被修改",
-    "hookModifiedDesc": "以下事件的命令已被手动修改，不会自动覆盖：{{events}}"
+    "hookModifiedDesc": "以下事件的命令已被手动修改，不会自动覆盖：{{events}}",
+    "settingsBrokenTitle": "配置缺失事件",
+    "settingsModifiedTitle": "配置被修改",
+    "scriptModifiedTitle": "脚本需要更新",
+    "repairSettings": "修复配置",
+    "repairScript": "更新脚本",
+    "repairSettingsSuccess": "Settings 配置已修复",
+    "repairScriptSuccess": "Hook 脚本已更新"
   },
   "quickActions": {
     "title": "快捷操作",

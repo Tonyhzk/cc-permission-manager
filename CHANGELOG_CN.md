@@ -6,6 +6,15 @@
 
 ---
 
+## [0.5.1] - 2026-05-04
+
+### 变更
+- **Settings 与 Script 检测分离** - `HookCheckResult.status` 现在只反映 Settings 层面的状态，脚本内容差异通过独立的 `scriptModified` 字段返回。此前两者混在同一个 `status` 中，`modified` 会吞掉 `partial` 信息
+- **修复函数独立** - 新增 `repairSettings()`（合并补全，保留用户原有值）和 `repairScript()`（整体替换，程序定义的脚本逻辑），替代修复场景下使用 `installHooks()` 的做法
+- **UI 独立显示** - Settings 问题与 Script 问题分别显示为独立警告卡片，各自有独立修复按钮，不再互斥
+
+---
+
 ## [0.5.0] - 2026-05-01
 
 ### 新增

@@ -261,12 +261,13 @@ export type HookInstallStatus = 'installed' | 'partial' | 'not_installed' | 'mod
  * Hook 检测结果
  */
 export interface HookCheckResult {
-  status: HookInstallStatus;
+  status: HookInstallStatus;   // 只反映 Settings 层面的状态
   scriptExists: boolean;       // unified-hook.py 是否存在
   permissionsExist: boolean;   // permissions.json 是否存在
   settingsHooksValid: boolean; // settings.json hooks 配置是否完整
-  missingEvents: string[];     // 缺失的 hook 事件名
-  modifiedEvents: string[];    // 命令内容被修改的事件名（事件存在但不含 unified-hook.py）
+  missingEvents: string[];     // Settings 中缺失的 hook 事件名
+  modifiedEvents: string[];    // Settings 中被修改的事件名（事件存在但不含 unified-hook.py）
+  scriptModified: boolean;     // 脚本内容与当前模板是否不同
 }
 
 /**
@@ -296,6 +297,7 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
         settingsHooksValid: false,
         missingEvents: [...REQUIRED_HOOK_EVENTS],
         modifiedEvents: [],
+        scriptModified: false,
       };
     }
 
@@ -320,12 +322,13 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
 
     if (!settingsExists) {
       return {
-        status: scriptModified ? 'modified' : 'partial',
+        status: 'partial',
         scriptExists,
         permissionsExist,
         settingsHooksValid: false,
         missingEvents: [...REQUIRED_HOOK_EVENTS],
-        modifiedEvents: scriptModified ? ['ScriptModified'] : [],
+        modifiedEvents: [],
+        scriptModified,
       };
     }
 
@@ -337,12 +340,13 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
 
     if (!settingsResult.success || !settingsResult.content) {
       return {
-        status: scriptModified ? 'modified' : 'partial',
+        status: 'partial',
         scriptExists,
         permissionsExist,
         settingsHooksValid: false,
         missingEvents: [...REQUIRED_HOOK_EVENTS],
-        modifiedEvents: scriptModified ? ['ScriptModified'] : [],
+        modifiedEvents: [],
+        scriptModified,
       };
     }
 
@@ -352,12 +356,13 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
 
       if (!hooks || typeof hooks !== 'object') {
         return {
-          status: scriptModified ? 'modified' : 'partial',
+          status: 'partial',
           scriptExists,
           permissionsExist,
           settingsHooksValid: false,
           missingEvents: [...REQUIRED_HOOK_EVENTS],
-          modifiedEvents: scriptModified ? ['ScriptModified'] : [],
+          modifiedEvents: [],
+          scriptModified,
         };
       }
 
@@ -384,11 +389,7 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
         }
       }
 
-      // 脚本内容与模板不同，也加入 modifiedEvents
-      if (scriptModified) {
-        modifiedEvents.push('ScriptModified');
-      }
-
+      // status 只看 Settings 层面，scriptModified 独立返回
       if (missingEvents.length === 0 && modifiedEvents.length === 0) {
         return {
           status: 'installed',
@@ -397,10 +398,11 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
           settingsHooksValid: true,
           missingEvents: [],
           modifiedEvents: [],
+          scriptModified,
         };
       }
 
-      // 只有缺失事件 → partial
+      // 有缺失事件 → partial
       if (modifiedEvents.length === 0) {
         return {
           status: 'partial',
@@ -409,10 +411,11 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
           settingsHooksValid: false,
           missingEvents,
           modifiedEvents: [],
+          scriptModified,
         };
       }
 
-      // 有修改事件或脚本内容不同 → modified
+      // 有被修改的事件 → modified
       return {
         status: 'modified',
         scriptExists,
@@ -420,15 +423,17 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
         settingsHooksValid: false,
         missingEvents,
         modifiedEvents,
+        scriptModified,
       };
     } catch {
       return {
-        status: scriptModified ? 'modified' : 'partial',
+        status: 'partial',
         scriptExists,
         permissionsExist,
         settingsHooksValid: false,
         missingEvents: [...REQUIRED_HOOK_EVENTS],
-        modifiedEvents: scriptModified ? ['ScriptModified'] : [],
+        modifiedEvents: [],
+        scriptModified,
       };
     }
   } catch {
@@ -439,6 +444,7 @@ export async function checkHookStatus(claudeDir?: string): Promise<HookCheckResu
       settingsHooksValid: false,
       missingEvents: [...REQUIRED_HOOK_EVENTS],
       modifiedEvents: [],
+      scriptModified: false,
     };
   }
 }
@@ -622,6 +628,92 @@ export async function switchHookLanguage(
     return {
       success: false,
       message: 'Failed to switch hook language',
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+/**
+ * 仅修复 Settings 中的 hooks 配置（合并补全，保留用户原有值）
+ */
+export async function repairSettings(
+  claudeDir?: string,
+  onPythonStatusChange?: PythonStatusCallback
+): Promise<InstallResult> {
+  try {
+    const targetDir = claudeDir || await getEffectiveClaudeDir();
+
+    // 1. 检测 Python 命令
+    const pythonCommand = await getPythonCommand(onPythonStatusChange);
+
+    // 2. 生成模板 hooks 配置
+    const currentLanguage = useConfigStore.getState().config?.language || 'zh_CN';
+    const currentPlatform = await getCurrentPlatform();
+    const platformType = currentPlatform === 'macos' ? 'mac' : currentPlatform;
+    const isGlobal = await isGlobalDir(targetDir);
+    const settingsContent = await generateSettingsConfig(currentLanguage as Language, targetDir, isGlobal, platformType, pythonCommand);
+    const settingsTemplate = JSON.parse(settingsContent);
+
+    // 3. 合并到 settings.json
+    const settingsFileName = await getSettingsFileName(targetDir);
+    const settingsPath = await join(targetDir, settingsFileName);
+    const result = await invoke<InstallResult>('merge_hooks_to_settings', {
+      settingsPath,
+      hooksJson: JSON.stringify(settingsTemplate.hooks),
+    });
+
+    if (!result.success) {
+      throw new Error(result.error || 'Failed to repair settings');
+    }
+
+    return {
+      success: true,
+      message: 'Settings hooks repaired successfully',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: 'Failed to repair settings',
+      error: error instanceof Error ? error.message : String(error),
+    };
+  }
+}
+
+/**
+ * 仅修复 Hook 脚本（整体替换为当前模板）
+ */
+export async function repairScript(
+  claudeDir?: string
+): Promise<InstallResult> {
+  try {
+    const targetDir = claudeDir || await getEffectiveClaudeDir();
+    const hooksDir = await join(targetDir, 'hooks');
+
+    // 1. 确保目录存在
+    await invoke('create_directory', { path: hooksDir });
+
+    // 2. 生成最新脚本
+    const currentLanguage = useConfigStore.getState().config?.language || 'zh_CN';
+    const hookScriptContent = await generateHookScript(currentLanguage as Language);
+    const hookDestPath = await join(hooksDir, 'unified-hook.py');
+
+    // 3. 整体替换
+    await invoke('write_config_file', {
+      path: hookDestPath,
+      content: hookScriptContent,
+    });
+
+    // 4. 设置可执行
+    await invoke('set_executable', { path: hookDestPath });
+
+    return {
+      success: true,
+      message: 'Hook script updated successfully',
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message: 'Failed to repair hook script',
       error: error instanceof Error ? error.message : String(error),
     };
   }

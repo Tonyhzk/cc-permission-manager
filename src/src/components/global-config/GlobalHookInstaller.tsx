@@ -20,12 +20,14 @@ import {
   uninstallHooks,
   checkHookStatus,
   switchHookLanguage,
+  repairSettings,
+  repairScript,
   isGlobalDir,
   type Language,
   type HookCheckResult,
 } from '@/lib/global-hook-installer';
 import { useConfigStore, useWorkspaceStore } from '@/stores';
-import { CheckCircle2, XCircle, Download, Trash2, Loader2, Languages, RotateCcw, AlertTriangle, Wrench } from 'lucide-react';
+import { CheckCircle2, XCircle, Download, Trash2, Loader2, Languages, RotateCcw, AlertTriangle, FileCode, Settings } from 'lucide-react';
 import { PythonStatusCard, type PythonStatus } from './PythonStatusCard';
 
 const AUTO_REPAIR_KEY = 'cc-permission-manager-auto-repair';
@@ -42,7 +44,8 @@ export function GlobalHookInstaller() {
   const [showResetDialog, setShowResetDialog] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [isSwitchingLanguage, setIsSwitchingLanguage] = useState(false);
-  const [isRepairing, setIsRepairing] = useState(false);
+  const [isRepairingSettings, setIsRepairingSettings] = useState(false);
+  const [isRepairingScript, setIsRepairingScript] = useState(false);
   const [settingsFileName, setSettingsFileName] = useState('settings.json');
   const [pythonStatus, setPythonStatus] = useState<PythonStatus>(null);
 
@@ -91,19 +94,24 @@ export function GlobalHookInstaller() {
     checkInstallStatus();
   }, [workspacePath]);
 
-  // 自动修复：检测到 partial 或 modified 且自动修复开启时，自动修复
+  // 自动修复：分离 Settings 和 Script 的修复
   useEffect(() => {
-    if (
-      (hookStatus?.status === 'partial' || hookStatus?.status === 'modified') &&
-      autoRepairEnabled &&
-      !isChecking &&
-      !isLoading &&
-      !isRepairing
-    ) {
-      handleRepair();
+    if (!hookStatus || isChecking || isLoading || isRepairingSettings || isRepairingScript) return;
+
+    const hasSettingsIssue = hookStatus.status === 'partial';
+    // Settings modified 不自动修，用户有意改的
+    const hasScriptIssue = hookStatus.scriptModified;
+
+    if (!autoRepairEnabled) return;
+
+    if (hasSettingsIssue) {
+      handleRepairSettings();
+    }
+    if (hasScriptIssue) {
+      handleRepairScript();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hookStatus?.status, autoRepairEnabled, isChecking]);
+  }, [hookStatus, autoRepairEnabled, isChecking]);
 
   // 成功消息自动消失
   useEffect(() => {
@@ -164,20 +172,19 @@ export function GlobalHookInstaller() {
     }
   };
 
-  // 修复 hooks 配置
-  const handleRepair = async () => {
-    setIsRepairing(true);
+  // 修复 Settings hooks 配置
+  const handleRepairSettings = async () => {
+    setIsRepairingSettings(true);
     setMessage(null);
 
     try {
-      const language = i18n.language.startsWith('zh') ? 'zh_CN' : 'en_US';
       const claudeDir = await getEffectiveClaudeDir();
-      const result = await installHooks(language as Language, claudeDir, (status) => {
+      const result = await repairSettings(claudeDir, (status) => {
         setPythonStatus(status);
       });
 
       if (result.success) {
-        setMessage({ type: 'success', text: t('hooks.repairSuccess') });
+        setMessage({ type: 'success', text: t('hooks.repairSettingsSuccess') });
         await loadConfig();
       } else {
         setMessage({ type: 'error', text: result.error || result.message });
@@ -185,7 +192,29 @@ export function GlobalHookInstaller() {
     } catch (error) {
       setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Unknown error' });
     } finally {
-      setIsRepairing(false);
+      setIsRepairingSettings(false);
+      await checkInstallStatus();
+    }
+  };
+
+  // 修复 Hook 脚本
+  const handleRepairScript = async () => {
+    setIsRepairingScript(true);
+    setMessage(null);
+
+    try {
+      const claudeDir = await getEffectiveClaudeDir();
+      const result = await repairScript(claudeDir);
+
+      if (result.success) {
+        setMessage({ type: 'success', text: t('hooks.repairScriptSuccess') });
+      } else {
+        setMessage({ type: 'error', text: result.error || result.message });
+      }
+    } catch (error) {
+      setMessage({ type: 'error', text: error instanceof Error ? error.message : 'Unknown error' });
+    } finally {
+      setIsRepairingScript(false);
       await checkInstallStatus();
     }
   };
@@ -241,6 +270,10 @@ export function GlobalHookInstaller() {
   const isPartial = hookStatus?.status === 'partial';
   const isModified = hookStatus?.status === 'modified';
   const isNotInstalled = hookStatus?.status === 'not_installed' || hookStatus === null;
+  const hasScriptIssue = hookStatus?.scriptModified === true;
+
+  // 是否正在执行任何修复
+  const isAnyRepairing = isRepairingSettings || isRepairingScript;
 
   return (
     <>
@@ -307,7 +340,7 @@ export function GlobalHookInstaller() {
           </CardContent>
         </Card>
       ) : (
-        // 已安装 / partial / modified：显示控件区
+        // 已安装：显示控件区
         <div className="space-y-4">
           {message && (
             <Alert variant={message.type === 'error' ? 'destructive' : 'default'}>
@@ -315,72 +348,70 @@ export function GlobalHookInstaller() {
             </Alert>
           )}
 
-          {/* Modified 状态提示（自动修复关闭时显示手动修复按钮） */}
-          {isModified && !autoRepairEnabled && hookStatus && (
-            <Alert className="border-blue-500/50 bg-blue-500/10 text-blue-700 dark:text-blue-400">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertDescription>
-                <div className="flex items-center justify-between">
-                  <span>
-                    {t('hooks.hookModifiedTitle')}：{hookStatus.modifiedEvents.join(', ')}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleRepair}
-                    disabled={isRepairing || isLoading}
-                    className="ml-4 gap-2 shrink-0"
-                  >
-                    {isRepairing ? (
-                      <>
-                        <Loader2 className="w-3 h-3 animate-spin" />
-                        {t('hooks.repairing')}
-                      </>
-                    ) : (
-                      <>
-                        <Wrench className="w-3 h-3" />
-                        {t('hooks.repairHook')}
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {/* Modified 自动修复中提示 */}
-          {isModified && autoRepairEnabled && isRepairing && (
-            <Alert>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <AlertDescription>{t('hooks.repairingAuto')}</AlertDescription>
-            </Alert>
-          )}
-
-          {/* Partial 状态警告 + 手动修复按钮 */}
-          {isPartial && !autoRepairEnabled && hookStatus && (
+          {/* Settings 问题：partial（缺事件） */}
+          {isPartial && hookStatus && (
             <Alert variant="destructive" className="border-yellow-500/50 bg-yellow-500/10 text-yellow-700 dark:text-yellow-400">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>
                 <div className="flex items-center justify-between">
-                  <span>
-                    {t('hooks.hookBrokenTitle')}：{hookStatus.missingEvents.join(', ')}
-                  </span>
+                  <div>
+                    <span className="font-medium">{t('hooks.settingsBrokenTitle')}</span>
+                    <span className="ml-2">{hookStatus.missingEvents.join(', ')}</span>
+                  </div>
+                  {autoRepairEnabled ? (
+                    isRepairingSettings && <span className="text-xs">{t('hooks.repairingAuto')}</span>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRepairSettings}
+                      disabled={isAnyRepairing || isLoading}
+                      className="ml-4 gap-2 shrink-0"
+                    >
+                      {isRepairingSettings ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          {t('hooks.repairing')}
+                        </>
+                      ) : (
+                        <>
+                          <Settings className="w-3 h-3" />
+                          {t('hooks.repairSettings')}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Settings 问题：modified（事件被改） */}
+          {isModified && hookStatus && (
+            <Alert className="border-blue-500/50 bg-blue-500/10 text-blue-700 dark:text-blue-400">
+              <AlertTriangle className="h-4 w-4" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-medium">{t('hooks.settingsModifiedTitle')}</span>
+                    <span className="ml-2">{hookStatus.modifiedEvents.join(', ')}</span>
+                  </div>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleRepair}
-                    disabled={isRepairing || isLoading}
+                    onClick={handleRepairSettings}
+                    disabled={isAnyRepairing || isLoading}
                     className="ml-4 gap-2 shrink-0"
                   >
-                    {isRepairing ? (
+                    {isRepairingSettings ? (
                       <>
                         <Loader2 className="w-3 h-3 animate-spin" />
                         {t('hooks.repairing')}
                       </>
                     ) : (
                       <>
-                        <Wrench className="w-3 h-3" />
-                        {t('hooks.repairHook')}
+                        <Settings className="w-3 h-3" />
+                        {t('hooks.repairSettings')}
                       </>
                     )}
                   </Button>
@@ -389,30 +420,64 @@ export function GlobalHookInstaller() {
             </Alert>
           )}
 
-          {/* 自动修复中提示 */}
-          {isPartial && autoRepairEnabled && isRepairing && (
-            <Alert>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <AlertDescription>{t('hooks.repairingAuto')}</AlertDescription>
+          {/* Script 问题：脚本内容与模板不同 */}
+          {hasScriptIssue && (
+            <Alert className="border-purple-500/50 bg-purple-500/10 text-purple-700 dark:text-purple-400">
+              <FileCode className="h-4 w-4" />
+              <AlertDescription>
+                <div className="flex items-center justify-between">
+                  <span className="font-medium">{t('hooks.scriptModifiedTitle')}</span>
+                  {autoRepairEnabled ? (
+                    isRepairingScript && <span className="text-xs">{t('hooks.repairingAuto')}</span>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleRepairScript}
+                      disabled={isAnyRepairing || isLoading}
+                      className="ml-4 gap-2 shrink-0"
+                    >
+                      {isRepairingScript ? (
+                        <>
+                          <Loader2 className="w-3 h-3 animate-spin" />
+                          {t('hooks.repairing')}
+                        </>
+                      ) : (
+                        <>
+                          <FileCode className="w-3 h-3" />
+                          {t('hooks.repairScript')}
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </AlertDescription>
             </Alert>
           )}
 
           <div className="flex flex-wrap items-center gap-2">
-            {/* 状态徽章 */}
+            {/* 状态徽章：独立显示 Settings 和 Script 状态 */}
             {isModified ? (
               <Badge variant="outline" className="border-blue-500 text-blue-600 dark:text-blue-400">
                 <AlertTriangle className="w-3 h-3 mr-1" />
-                {t('hooks.hookModifiedTitle')}
+                {t('hooks.settingsModifiedTitle')}
               </Badge>
             ) : isPartial ? (
               <Badge variant="outline" className="border-yellow-500 text-yellow-600 dark:text-yellow-400">
                 <AlertTriangle className="w-3 h-3 mr-1" />
-                {t('hooks.hookBrokenTitle')}
+                {t('hooks.settingsBrokenTitle')}
               </Badge>
             ) : (
               <Badge variant="default" className="bg-green-500">
                 <CheckCircle2 className="w-3 h-3 mr-1" />
                 {t('hooks.installed')}
+              </Badge>
+            )}
+
+            {hasScriptIssue && (
+              <Badge variant="outline" className="border-purple-500 text-purple-600 dark:text-purple-400">
+                <FileCode className="w-3 h-3 mr-1" />
+                {t('hooks.scriptModifiedTitle')}
               </Badge>
             )}
 
@@ -435,7 +500,7 @@ export function GlobalHookInstaller() {
               variant="outline"
               size="sm"
               onClick={() => handleSwitchLanguage(installedLanguage === 'zh_CN' ? 'en_US' : 'zh_CN')}
-              disabled={isSwitchingLanguage || isLoading || isRepairing}
+              disabled={isSwitchingLanguage || isLoading || isAnyRepairing}
               className="gap-2"
             >
               {isSwitchingLanguage ? (
@@ -455,7 +520,7 @@ export function GlobalHookInstaller() {
               variant="outline"
               size="sm"
               onClick={() => setShowResetDialog(true)}
-              disabled={isResetting || isLoading || isRepairing}
+              disabled={isResetting || isLoading || isAnyRepairing}
               className="gap-2"
             >
               {isResetting ? (
@@ -473,7 +538,7 @@ export function GlobalHookInstaller() {
 
             <Button
               onClick={() => setShowUninstallDialog(true)}
-              disabled={isLoading || isChecking || isRepairing}
+              disabled={isLoading || isChecking || isAnyRepairing}
               variant="destructive"
               size="sm"
               className="gap-2"

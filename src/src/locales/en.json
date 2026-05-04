@@ -169,9 +169,16 @@
     "repairing": "Repairing...",
     "repairSuccess": "Hook config repaired successfully",
     "autoRepair": "Auto Repair",
-    "repairingAuto": "Auto-repairing Hook configuration...",
+    "repairingAuto": "Auto-repairing...",
     "hookModifiedTitle": "Hook Command Modified",
-    "hookModifiedDesc": "The following events have been manually modified and won't be auto-overwritten: {{events}}"
+    "hookModifiedDesc": "The following events have been manually modified and won't be auto-overwritten: {{events}}",
+    "settingsBrokenTitle": "Missing Hook Events",
+    "settingsModifiedTitle": "Config Modified",
+    "scriptModifiedTitle": "Script Needs Update",
+    "repairSettings": "Repair Config",
+    "repairScript": "Update Script",
+    "repairSettingsSuccess": "Settings hooks repaired successfully",
+    "repairScriptSuccess": "Hook script updated successfully"
   },
   "quickActions": {
     "title": "Quick Actions",
